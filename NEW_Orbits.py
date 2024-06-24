@@ -18,17 +18,17 @@ import pykep as pk
 from pykep.core import epoch as def_epoch
 
 #planes
-from enum import Enum
+# from enum import Enum
 
-class Planes(Enum):
-    EARTH_EQUATOR = "Earth mean Equator and Equinox of epoch (J2000.0)"
-    EARTH_ECLIPTIC = "Earth mean Ecliptic and Equinox of epoch (J2000.0)"
-    BODY_FIXED = "Rotating body mean Equator and node of date"
+# class Planes(Enum):
+#    EARTH_EQUATOR = "Earth mean Equator and Equinox of epoch (J2000.0)"
+#    EARTH_ECLIPTIC = "Earth mean Ecliptic and Equinox of epoch (J2000.0)"
+#    BODY_FIXED = "Rotating body mean Equator and node of date"
     
 
 class ClassicalState:
     
-    def __init__(self, attractor, elements, plane):
+    def __init__(self, attractor, elements): #, plane):
         """Constructor.
 
         Parameters
@@ -44,7 +44,7 @@ class ClassicalState:
         """
         self._attractor = attractor
         self._elements = elements
-        self._plane = plane
+        #self._plane = plane
         
     """State defined by its classical orbital elements.
 
@@ -176,7 +176,7 @@ class OrbitCreationMixin:
         argp,
         nu,
         epoch = def_epoch(0,"mjd2000"),
-        plane=Planes.EARTH_EQUATOR,
+        #plane=Planes.EARTH_EQUATOR,
     ):
         """Return `Orbit` from classical orbital elements.
 
@@ -226,7 +226,7 @@ class OrbitCreationMixin:
             
 
         ss = ClassicalState(
-            attractor, (a * (1 - ecc**2), ecc, inc, raan, argp, nu), plane
+            attractor, (a * (1 - ecc**2), ecc, inc, raan, argp, nu)#, plane
         )
         return cls(ss, epoch)
     
@@ -329,76 +329,3 @@ class Orbit(OrbitCreationMixin):
 
 
 ###############################################################################
-class OrbitCreationMixin:
-    """
-    Mixin-class containing class-methods to create Orbit objects
-    """
-    
-    def __init__(self, *_, **__):  # HACK stub to make mypy happy
-        ...                        # dunno what this does, feels like I need an _init_
-        
-    @classmethod
-    @u.quantity_input(
-        a=u.m, ecc=u.one, inc=u.rad, raan=u.rad, argp=u.rad, nu=u.rad
-    )
-    def from_classical(
-        cls,
-        attractor,
-        a,
-        ecc,
-        inc,
-        raan,
-        argp,
-        nu,
-        epoch = def_epoch(0,"mjd2000"),
-        plane=Planes.EARTH_EQUATOR,
-    ):
-        """Return `Orbit` from classical orbital elements.
-
-        Parameters
-        ----------
-        attractor : Body
-            Main attractor.
-        a : ~astropy.units.Quantity
-            Semi-major axis.
-        ecc : ~astropy.units.Quantity
-            Eccentricity.
-        inc : ~astropy.units.Quantity
-            Inclination
-        raan : ~astropy.units.Quantity
-            Right ascension of the ascending node.
-        argp : ~astropy.units.Quantity
-            Argument of the pericenter.
-        nu : ~astropy.units.Quantity
-            True anomaly.
-        epoch : ~astropy.time.Time, optional
-            Epoch, default to J2000.
-        plane : ~poliastro.frames.Planes
-            Fundamental plane of the frame.
-
-        """
-        for element in a, ecc, inc, raan, argp, nu, epoch:
-            if not element.isscalar:
-                raise ValueError(f"Elements must be scalar, got {element}")
-
-        if ecc == 1.0 * u.one:
-            raise ValueError(
-                "For parabolic orbits use Orbit.parabolic instead"
-            )
-
-        if not 0 * u.deg <= inc <= 180 * u.deg:
-            raise ValueError("Inclination must be between 0 and 180 degrees")
-
-        if ecc > 1 and a > 0:
-            raise ValueError("Hyperbolic orbits have negative semimajor axis")
-
-        if not -np.pi * u.rad <= nu < np.pi * u.rad:
-            warn("Wrapping true anomaly to -π <= nu < π", stacklevel=2)
-            nu = (
-                (nu + np.pi * u.rad) % (2 * np.pi * u.rad) - np.pi * u.rad
-            ).to(nu.unit)
-
-        ss = ClassicalState(
-            attractor, (a * (1 - ecc**2), ecc, inc, raan, argp, nu), plane
-        )
-        return cls(ss, epoch)

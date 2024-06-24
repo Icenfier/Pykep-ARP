@@ -13,15 +13,16 @@
 - [ ] process_asteroids
   - [X] check all files available
   - [ ] to_orbit function
-  - [ ] OrbitBase.ecliptic method
-  - [ ] true_anomaly function (angles)
-  - [ ] find alternative to Orbit class (create own feat. pykep stuff)
+  - [X] true_anomaly function (angles)
+  - [ ] find alternative to Orbit class (planet module in pykep)
       - [ ] sort planes subclass
       - [ ] sort creation subclass
       - [ ] sort state subclass
       - [ ] test all
   - [ ] ensure all units correct
   - [ ] ensure start epoch correct
+  - [ ] ensure frame of reference is consistant (Ecliptic)
+- [ ] Replacing Body class with objects that use SPICE kernels?
 - [ ] space_util, MU, MJD
 - [ ] Test with transfer_example
   - [ ] check all files available
@@ -29,4 +30,5 @@
 ## Other objectives
 - [ ] Find asteroid r & v using Pykep
 - [ ] Plotting using Pykep
-
+- [ ] Investigating using SPICE for asteroids
+ 

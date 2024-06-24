@@ -19,3 +19,18 @@
 
 ### Fri, 2.5 hrs
 - PM: Replacing angle conversions
+
+
+## Week 2, 24/06
+### Mon
+- AM: attempting to use planet module to replace orbit class, ran into issue with planet.keplerian
+- PM: more attempts to fix .keplerian, keep getting error "python argument types did not match C++ signature"
+- changed a few epochs and angles
+
+### Tues
+
+### Wed
+
+### Thurs
+
+### Fri

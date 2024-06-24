@@ -1,8 +1,9 @@
+import numpy as np
 from numpy import deg2rad
 from astropy import units as u
-from astropy.time import Time,TimeDelta
-from poliastro.core.util import spherical_to_cartesian
-from poliastro.core.angles import M_to_E, E_to_nu
+from pykep.core import epoch as def_epoch
+#from poliastro.core.util import spherical_to_cartesian
+#from poliastro.core.angles import M_to_E, E_to_nu
 from poliastro.bodies import Body
 from poliastro.twobody import Orbit
 from poliastro.frames import Planes
@@ -11,16 +12,13 @@ from poliastro.maneuver import Maneuver
 def to_timedelta(x):
     return x * u.day
 
-def MJD_to_Time(x):
-    return Time(x, scale='ut1', format='mjd')
-
 # The start time of earth and asteroids orbit.
-EARTH_START_EPOCH = MJD_to_Time(59396)
+EARTH_START_EPOCH = def_epoch(59396,"mjd2000")
 # The mission is limited within 20 years.
 # 00:00:00 1st January 2121 (MJD) (first launch)
-START_EPOCH = MJD_to_Time(95739)
+START_EPOCH = def_epoch(95739,"mjd2000")
 # 00:00:00 1st January 2141 (MJD) (last launch)
-LAST_EPOCH = MJD_to_Time(103044)
+LAST_EPOCH = def_epoch(103044,"mjd2000")
 
 class Asteroids:
     def __init__(self, size, seed):
@@ -36,12 +34,46 @@ class Asteroids:
 
 # Table 2 Constants and unit conversions
 AU = 1.49597870691e8 # km
-MU = 1.32712440018e11 # km^3/s^2
+MU = 1.32712440018e11 # km^3/s^2 # TODO probably remove, dont need own sun object?
 SEC_PER_DAY = 86400 # s
 DAYS_PER_YEAR = 365.25 # days
 
+def spherical_to_cartesian(v):
+    r"""Compute cartesian coordinates from spherical coordinates (norm, colat, long). This function is vectorized.
+
+    .. math::
+
+       v = norm \cdot \begin{bmatrix}
+       \sin(colat)\cos(long)\\
+       \sin(colat)\sin(long)\\
+       \cos(colat)\\
+       \end{bmatrix}
+
+    Parameters
+    ----------
+    v : numpy.ndarray
+        Spherical coordinates in 3D (norm, colat, long). Angles must be in radians.
+
+    Returns
+    -------
+    v : numpy.ndarray
+        Cartesian coordinates (x,y,z)
+
+    """
+    v = np.asarray(v)
+    norm_vecs = np.expand_dims(np.asarray(v[..., 0]), -1)
+    vsin = np.sin(v[..., 1:3])
+    vcos = np.cos(v[..., 1:3])
+    x = np.asarray(vsin[..., 0] * vcos[..., 1])
+    y = np.asarray(vsin[..., 0] * vsin[..., 1])
+    z = np.asarray(vcos[..., 0])
+    return norm_vecs * np.stack((x, y, z), axis=-1)
+
 def M_to_nu(M, ecc):
-    return E_to_nu(M_to_E(M = M, ecc = ecc), ecc = ecc)
+    # M: must be radians
+    # https://en.wikipedia.org/wiki/True_anomaly#From_the_mean_anomaly
+    nu = M + (2 * ecc - 0.25 * ecc**3) * np.sin(M) + 1.25 * (ecc**2) * np.sin(2*M) + (13./12.) * (ecc**3) * np.sin(3*M)
+    return nu
     
 class OrbitBuilder:
     # Create my own Sun
