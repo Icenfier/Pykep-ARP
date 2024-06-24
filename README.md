@@ -14,7 +14,7 @@
   - [X] check all files available
   - [ ] to_orbit function
   - [ ] OrbitBase.ecliptic method
-  - [ ] true_anomaly function
+  - [ ] true_anomaly function (angles)
   - [ ] find alternative to Orbit class (create own feat. pykep stuff)
       - [ ] sort planes subclass
       - [ ] sort creation subclass

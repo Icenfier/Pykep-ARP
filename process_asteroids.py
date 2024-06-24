@@ -9,23 +9,23 @@ from astropy import units as u
 ##from poliastro.core.angles import M_to_E,E_to_nu
 from space_util import MU, MJD_to_Time
 # Useful for numpy vectors
-M_to_E_v = np.vectorize(M_to_E)
+#################################################M_to_E_v = np.vectorize(M_to_E)
 
 def theta_from_E(E, e):
-    #return 2. * np.arctan(np.sqrt((1. + e)/(1. - e)) * np.tan(E / 2.))
-    return E_to_nu(E=E, ecc=e)
+    return 2. * np.arctan(np.sqrt((1. + e)/(1. - e)) * np.tan(E / 2.))
+    #return E_to_nu(E=E, ecc=e)
 
 # The start time of earth and asteroids orbit.
-EARTH_START_EPOCH = MJD_to_Time(59396)
+#################################################EARTH_START_EPOCH = MJD_to_Time(59396)
 
 def true_anomaly(M, e):
     # M: must be radians
     # http://www.braeunig.us/space/orbmech.htm
     # theta = M + 2 * e * np.sin(M_t) + 1.25 * (e**2) * np.sin(2*M)
     # https://en.wikipedia.org/wiki/True_anomaly#From_the_mean_anomaly
-    # theta = M + (2 * e - 0.25 * e**3) * np.sin(M) + 1.25 * (e**2) * np.sin(2*M) + (13./12.) * (e**3) * np.sin(3*M)
-    E = M_to_E_v(M=M, ecc=e)
-    theta = theta_from_E(E, e)
+    theta = M + (2 * e - 0.25 * e**3) * np.sin(M) + 1.25 * (e**2) * np.sin(2*M) + (13./12.) * (e**3) * np.sin(3*M)
+    # E = np.vectorize(M_to_E_v(M=M, ecc=e)
+    # theta = theta_from_E(E, e)
     return theta
 
 class OrbitBase:

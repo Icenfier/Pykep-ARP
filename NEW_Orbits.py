@@ -271,6 +271,61 @@ class Orbit(OrbitCreationMixin):
     def plane(self):
         """Fundamental plane of the frame."""
         return self._state.plane
+    
+    @cached_property
+    def r(self):
+        """Position vector."""
+        return self._state.to_vectors().r
+
+    @cached_property
+    def v(self):
+        """Velocity vector."""
+        return self._state.to_vectors().v
+
+    @cached_property
+    def a(self):
+        """Semimajor axis."""
+        return self._state.to_classical().a
+
+    @cached_property
+    def p(self):
+        """Semilatus rectum."""
+        return self._state.to_classical().p
+
+    @cached_property
+    def r_p(self):
+        """Radius of pericenter."""
+        return self._state.r_p
+
+    @cached_property
+    def r_a(self):
+        """Radius of apocenter."""
+        return self._state.r_a
+
+    @cached_property
+    def ecc(self):
+        """Eccentricity."""
+        return self._state.to_classical().ecc
+
+    @cached_property
+    def inc(self):
+        """Inclination."""
+        return self._state.to_classical().inc
+
+    @cached_property
+    def raan(self):
+        """Right ascension of the ascending node."""
+        return self._state.to_classical().raan
+
+    @cached_property
+    def argp(self):
+        """Argument of the perigee."""
+        return self._state.to_classical().argp
+
+    @property
+    def nu(self):
+        """True anomaly."""
+        return self._state.to_classical().nu
 
 
 ###############################################################################
