@@ -31,4 +31,5 @@
 - [ ] Find asteroid r & v using Pykep
 - [ ] Plotting using Pykep
 - [ ] Investigating using SPICE for asteroids
+- [ ] using pykep for Lambert
  
