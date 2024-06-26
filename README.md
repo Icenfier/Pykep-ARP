@@ -10,20 +10,16 @@
 - [X] Ensure correct python version
 
 ## Main objectives
-- [ ] process_asteroids
+- [X] process_asteroids
   - [X] check all files available
-  - [ ] to_orbit function
+  - [X] to_orbit function
   - [X] true_anomaly function (angles)
-  - [ ] find alternative to Orbit class (planet module in pykep)
-      - [ ] sort planes subclass
-      - [ ] sort creation subclass
-      - [ ] sort state subclass
-      - [ ] test all
-  - [ ] ensure all units correct
-  - [ ] ensure start epoch correct
-  - [ ] ensure frame of reference is consistant (Ecliptic)
-- [ ] Replacing Body class with objects that use SPICE kernels?
+  - [X] find alternative to Orbit class (planet module in pykep)
+  - [X] ensure all units correct
+  - [X] ensure start epoch correct (MJD2000)
+  - [X] ensure frame of reference is consistant (J2000 heliocentric ecliptic)
 - [ ] space_util, MU, MJD
+  - [ ] replace 'propagate' from poliastro twobody, propagate.lagrangian OR planet.eph
 - [ ] Test with transfer_example
   - [ ] check all files available
 

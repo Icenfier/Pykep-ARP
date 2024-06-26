@@ -1,6 +1,8 @@
 import numpy as np
 from numpy import deg2rad
+import pykep as pk
 from astropy import units as u
+from scipy.constants import G
 from pykep.core import epoch as def_epoch
 #from poliastro.core.util import spherical_to_cartesian
 #from poliastro.core.angles import M_to_E, E_to_nu
@@ -88,8 +90,17 @@ class OrbitBuilder:
                                   plane = Planes.EARTH_ECLIPTIC)
     
     @classmethod
-    def eliptic(cls, a, e, i, raan, w, nu, epoch):
-        return Orbit.from_classical(cls.Sun, a * AU * u.km,
+    def eliptic(a, e, i, raan, w, M, mass, epoch):
+        return pk.planet.keplerian(epoch, (a * pk.AU, # AU
+                                           e,         # no units
+                                           i,         # rad
+                                           raan,      # rad
+                                           w,         # rad
+                                           M),        # rad
+                                    pk.MU_SUN, G*mass)
+    
+    
+    Orbit.from_classical(cls.Sun, a * AU * u.km,
                                     e * u.one,
                                     i * u.rad,
                                     raan * u.rad,
@@ -118,9 +129,12 @@ Earth = OrbitBuilder.eliptic(
     , i = deg2rad(3.049485258137714e-3) # deg
     , raan = deg2rad(1.662869706216879e2) # deg
     , w = deg2rad(2.978214889887391e2) # omega deg
-    , nu = M_to_nu(M = deg2rad(1.757352290983351e2), # deg
-                   ecc = 1.693309475505424e-2) # theta, rad
-    , epoch = EARTH_START_EPOCH).propagate(START_EPOCH) # MJD
+    , M = deg2rad(1.757352290983351e2) # deg
+    , epoch = EARTH_START_EPOCH)
+
+r0, v0 = Earth.eph(EARTH_START_EPOCH)
+r, v = Earth.eph(START_EPOCH)
+Earth = pk.planet.propagate_lagrangian(r0 = Earth.r , v0 = [0,1,0], tof = np.pi/2, mu = 1)
 
 
 def apply_impulse(orbit, dt = 0, dv = None):
