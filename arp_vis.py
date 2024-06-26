@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from poliastro.plotting import StaticOrbitPlotter
-from poliastro.plotting.util import generate_label
-from poliastro.twobody.propagation import propagate
+#from poliastro.plotting import StaticOrbitPlotter
+#from poliastro.plotting.util import generate_label
+#from poliastro.twobody.propagation import propagate
 from astropy import units as u
 from astropy.time import TimeDelta
-from arp import AsteroidRoutingProblem
+#from arp import AsteroidRoutingProblem
 from space_util import (
     START_EPOCH,
     Earth,

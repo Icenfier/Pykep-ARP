@@ -5,33 +5,28 @@ from scipy.constants import G
 from pykep.core import epoch as def_epoch
 from numpy import deg2rad
 
-# The start time of earth and asteroids orbit.
-EARTH_START_EPOCH = def_epoch(59396,"mjd2000")
-# The mission is limited within 20 years.
-# 00:00:00 1st January 2121 (MJD) (first launch)
+from space_util import (
+    Earth)
+
 START_EPOCH = def_epoch(95739,"mjd2000")
 
-class OrbitBuilder:
-    def eliptic(a, e, i, raan, w, M, mass, epoch):
-        return pk.planet.keplerian(epoch, (a * pk.AU, # AU
-                                           e,         # no units
-                                           i,         # rad
-                                           raan,      # rad
-                                           w,         # rad
-                                           M),        # rad
-                                    pk.MU_SUN, G*mass)
+n = 5
+size = n
+seed = 47
+ast_id = 1
 
+from pandas import read_pickle
+ast_orbits = read_pickle("ast_orbits.pkl.gz")
+print(ast_orbits)
+from numpy.random import default_rng
+rng = default_rng(seed)
+ids = rng.integers(ast_orbits.index.min(), ast_orbits.index.max() + 1, size = size)
+ast_orbits = ast_orbits[ids].reset_index(drop=True)
+bitch = ast_orbits[0]
+#print(ast_orbits[0].mass)
 
-Earth_init = OrbitBuilder.eliptic(
-    # Table 1 Earth’s orbital elements in the J2000 heliocentric ecliptic reference frame
-    a = 9.998012770769207e-1 # AU
-    , e = 1.693309475505424e-2
-    , i = deg2rad(3.049485258137714e-3) # deg
-    , raan = deg2rad(1.662869706216879e2) # deg
-    , w = deg2rad(2.978214889887391e2) # omega deg
-    , M = deg2rad(1.757352290983351e2) # deg
-    , mass = 5.9722e24 # kg
-    , epoch = EARTH_START_EPOCH) # MJD
-
-print(Earth_init.eph(EARTH_START_EPOCH))
-print(Earth_init.eph(START_EPOCH))
+#orbit = ast_orbits.loc[ast_id]
+#r, v = orbit.eph(START_EPOCH)
+#print(orbit.mass)
+#planet = pk.planet.keplerian(START_EPOCH, r, v, pk.MU_SUN, G*orbit.mass)
+    

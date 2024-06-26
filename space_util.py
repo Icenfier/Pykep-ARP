@@ -4,12 +4,13 @@ import pykep as pk
 from astropy import units as u
 from scipy.constants import G
 from pykep.core import epoch as def_epoch
+from pykep.core import DAY2SEC
 #from poliastro.core.util import spherical_to_cartesian
 #from poliastro.core.angles import M_to_E, E_to_nu
-from poliastro.bodies import Body
-from poliastro.twobody import Orbit
-from poliastro.frames import Planes
-from poliastro.maneuver import Maneuver
+#from poliastro.bodies import Body
+#from poliastro.twobody import Orbit
+#from poliastro.frames import Planes
+#from poliastro.maneuver import Maneuver
 
 def to_timedelta(x):
     return x * u.day
@@ -32,7 +33,9 @@ class Asteroids:
         self.ast_orbits = ast_orbits[ids].reset_index(drop=True)
 
     def get_orbit(self, ast_id):
-        return self.ast_orbits.loc[ast_id].propagate(START_EPOCH)
+        orbit = self.ast_orbits.loc[ast_id]
+        r, v = orbit.eph(START_EPOCH)
+        return pk.planet.keplerian(START_EPOCH, r, v, pk.MU_SUN, orbit.mu_self)
 
 # Table 2 Constants and unit conversions
 AU = 1.49597870691e8 # km
@@ -72,6 +75,7 @@ def spherical_to_cartesian(v):
     return norm_vecs * np.stack((x, y, z), axis=-1)
 
 def M_to_nu(M, ecc):
+    # TODO do we even need this??
     # M: must be radians
     # https://en.wikipedia.org/wiki/True_anomaly#From_the_mean_anomaly
     nu = M + (2 * ecc - 0.25 * ecc**3) * np.sin(M) + 1.25 * (ecc**2) * np.sin(2*M) + (13./12.) * (ecc**3) * np.sin(3*M)
@@ -79,17 +83,16 @@ def M_to_nu(M, ecc):
     
 class OrbitBuilder:
     # Create my own Sun
-    Sun = Body(
-        parent=None,
-        k = MU * (u.km ** 3 / u.s ** 2),
-        name="Sun")
+    #Sun = Body(
+    #    parent=None,
+    #    k = MU * (u.km ** 3 / u.s ** 2),
+    #    name="Sun")
 
     @classmethod
     def from_vectors(cls, r, v, epoch):
         return Orbit.from_vectors(cls.Sun, r, v, epoch = epoch,
                                   plane = Planes.EARTH_ECLIPTIC)
     
-    @classmethod
     def eliptic(a, e, i, raan, w, M, mass, epoch):
         return pk.planet.keplerian(epoch, (a * pk.AU, # AU
                                            e,         # no units
@@ -100,16 +103,6 @@ class OrbitBuilder:
                                     pk.MU_SUN, G*mass)
     
     
-    Orbit.from_classical(cls.Sun, a * AU * u.km,
-                                    e * u.one,
-                                    i * u.rad,
-                                    raan * u.rad,
-                                    w * u.rad,
-                                    nu = nu * u.rad,
-                                    epoch = epoch, # MJD
-                                    # Same as HeliocentricEclipticJ2000
-                                    # https://github.com/poliastro/poliastro/blob/main/src/poliastro/frames/util.py
-                                    plane = Planes.EARTH_ECLIPTIC)
     @classmethod
     def circular(cls, a, i, raan, arglat, epoch):
         return Orbit.circular(cls.Sun, alt = a * AU * u.km,
@@ -122,22 +115,22 @@ class OrbitBuilder:
                               # https://github.com/poliastro/poliastro/blob/main/src/poliastro/frames/util.py
                               plane = Planes.EARTH_ECLIPTIC)
 
-Earth = OrbitBuilder.eliptic(
-    # Table 1 Earth’s orbital elements in the J2000 heliocentric ecliptic reference frame
-    a = 9.998012770769207e-1 # AU
-    , e = 1.693309475505424e-2
-    , i = deg2rad(3.049485258137714e-3) # deg
-    , raan = deg2rad(1.662869706216879e2) # deg
-    , w = deg2rad(2.978214889887391e2) # omega deg
-    , M = deg2rad(1.757352290983351e2) # deg
-    , epoch = EARTH_START_EPOCH)
 
-r0, v0 = Earth.eph(EARTH_START_EPOCH)
-r, v = Earth.eph(START_EPOCH)
-Earth = pk.planet.propagate_lagrangian(r0 = Earth.r , v0 = [0,1,0], tof = np.pi/2, mu = 1)
+Earth = OrbitBuilder.eliptic(
+                # Table 1 Earth’s orbital elements in the J2000 heliocentric ecliptic reference frame
+                a = 9.998012770769207e-1, # AU
+                e = 1.693309475505424e-2,
+                i = deg2rad(3.049485258137714e-3), # deg
+                raan = deg2rad(1.662869706216879e2), # deg
+                w = deg2rad(2.978214889887391e2), # deg
+                M = deg2rad(1.757352290983351e2), # deg
+                mass = 5.9722e24, # kg
+                epoch = EARTH_START_EPOCH) # epoch
+
 
 
 def apply_impulse(orbit, dt = 0, dv = None):
+    # TODO
     tmp = orbit
     if dt > 0:
         tmp = tmp.propagate(dt)
@@ -145,6 +138,7 @@ def apply_impulse(orbit, dt = 0, dv = None):
     return OrbitBuilder.from_vectors(r, v + dv, tmp.epoch)
 
 def launch_from_Earth(launch_epoch, launch_v):
+    # TODO
     intermediate_orbit = apply_impulse(Earth.propagate(launch_epoch),
                                        dt = 0,
                                        dv = launch_v * (u.km / u.s))
@@ -154,6 +148,7 @@ def launch_from_Earth(launch_epoch, launch_v):
 def transfer_from_Earth(to_orbit, t0, t1, t2,
                       # (v_norm, v_colat, v_long)
                       v_cartesian = None, v_spherical = None):
+    # TODO
     v = v_cartesian
     if v is None:
         v = spherical_to_cartesian(v_spherical)
@@ -169,6 +164,7 @@ def transfer_from_Earth(to_orbit, t0, t1, t2,
     
 
 def two_shot_transfer(from_orbit, to_orbit, t0, t1):
+    # TODO
     assert t0 >= 0 and t1 > 0,f'It must be true that t0={t0} >= 0 and t1={t1} > 0'
     from_orbit = from_orbit.propagate(from_orbit.epoch + to_timedelta(t0))
     #print(f'from_orbit.epoch: {from_orbit.epoch}')
