@@ -11,7 +11,7 @@
 ### Wed, 7 hrs
 - AM: Attepting to update anaconda, reinstalling multiple times
 - PM: Copying code to github, more issues with astroquery (had to downloaded older version of python).
-- Eventually managed to copy over bits of code and ensured I had the correct libraries to run it.
+-     Eventually managed to copy over bits of code and ensured I had the correct libraries to run it.
 
 ### Thurs, 7 hrs
 - AM: Investigating poliastro's Orbits class, planning my own version of it to relace 
@@ -25,11 +25,18 @@
 ### Mon
 - AM: attempting to use planet module to replace orbit class, ran into issue with planet.keplerian
 - PM: more attempts to fix .keplerian, keep getting error "python argument types did not match C++ signature"
-- changed a few epochs and angles
+-     changed a few epochs and angles
 
 ### Tues
+- AM: fixed .keplerian issue, the problem was with astropy units, switched to using scipy
+- PM: finished updating process_asteroids, now fully independent of poliastro
+-     looked into replacing orbit propagation
 
 ### Wed
+- AM: replacing Earth object in space_util. Ran into issues when running, managed to fix (was expecting cls input)
+- PM: completely replaced main space_util code (not all callable funcitions though)
+-     Asteroids class now works with Planet objects, including changing epoch times
+-     started looking at arp.py
 
 ### Thurs
 

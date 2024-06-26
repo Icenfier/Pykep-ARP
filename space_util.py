@@ -39,7 +39,7 @@ class Asteroids:
 
 # Table 2 Constants and unit conversions
 AU = 1.49597870691e8 # km
-MU = 1.32712440018e11 # km^3/s^2 # TODO probably remove, dont need own sun object?
+#MU = 1.32712440018e11 # km^3/s^2 # TODO probably remove, dont need own sun object?
 SEC_PER_DAY = 86400 # s
 DAYS_PER_YEAR = 365.25 # days
 

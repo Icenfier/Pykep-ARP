@@ -20,10 +20,14 @@
   - [X] ensure frame of reference is consistant (J2000 heliocentric ecliptic)
 - [ ] space_util, MU, MJD
   - [X] orbit creation
-  - [ ] replace 'propagate' from poliastro twobody, propagate.lagrangian OR planet.eph
+  - [X] replace 'propagate', propagate.lagrangian OR planet.eph
   - [ ] arp.py and arp_vis import stuff from space_util
+    - [X] Asteroids class
 - [ ] arp
-  - [ ] update all '.get_ast_orbit' (lambda func.)
+  - [ ] use pk.lambert_problem, pk.phasing.knn, pk.phasing.three_impulses_approx() OR pk.trajopt.pl2pl_N_impulses
+  - [ ] update all '.get_ast_orbit', look at where functions are called
+  - [ ] Spaceship.visit (from_orbit, VisitProblem)
+  - [ ] Spaceship.get_energy_nearest (orbit propagation)
 - [ ] arp_vis
   - [ ] propagation
   - [ ] plotting

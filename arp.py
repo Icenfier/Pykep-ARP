@@ -1,12 +1,12 @@
 import numpy as np
-from space_util import (
-    Asteroids,
-    to_timedelta,
-    transfer_from_Earth,
-    two_shot_transfer,
-    START_EPOCH,
-    Earth,
-    MU
+import pykep as pk
+from space_util import (   # done?
+    Asteroids,             # src fixed, uses not
+    to_timedelta,          # src not, uses not
+    transfer_from_Earth,   # src not, uses not
+    two_shot_transfer,     # src not, uses not
+    START_EPOCH,           # src fixed, uses not
+    Earth                  # src fixed, uses not
 )
 
 from scipy.optimize import minimize,Bounds
@@ -146,8 +146,8 @@ class Spaceship:
         ast_orbits = [ self.get_ast_orbit(ast_id).propagate(epoch) for ast_id in asteroids ]
         ast_r = np.array([ orbit.r.to_value() for orbit in ast_orbits ])
         ast_v = np.array([ orbit.v.to_value() for orbit in ast_orbits ])
-        ast_energy = (ast_v**2).sum(axis=1)/2 - MU / np.linalg.norm(ast_r, axis=1)
-        ship_energy = (ship_v**2).sum(axis=1) / 2 - MU / np.linalg.norm(ship_r, axis=1)
+        ast_energy = (ast_v**2).sum(axis=1)/2 - pk.MU_SUN / np.linalg.norm(ast_r, axis=1)
+        ship_energy = (ship_v**2).sum(axis=1) / 2 - pk.MU_SUN / np.linalg.norm(ship_r, axis=1)
         energy_difference = np.abs(ast_energy - ship_energy)
         ast_dist = distance.cdist(ship_r, ast_r, 'euclidean')
         print(f'diff_r[0]={ast_dist[0]}, energy_diff[0]={energy_difference[0]}')
