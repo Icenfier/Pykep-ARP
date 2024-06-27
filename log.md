@@ -39,5 +39,7 @@
 -     started looking at arp.py
 
 ### Thurs
+- AM: figuring out which functions can be replaced by pykep functions, and which just need to be amended
+-     noting where functions are called
 
 ### Fri

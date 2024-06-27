@@ -1,6 +1,6 @@
 import numpy as np
 import pykep as pk
-from space_util import (   # done?
+from space_util import (   # fixed or not?
     Asteroids,             # src fixed, uses not
     to_timedelta,          # src not, uses not
     transfer_from_Earth,   # src not, uses not

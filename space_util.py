@@ -38,10 +38,11 @@ class Asteroids:
         return pk.planet.keplerian(START_EPOCH, r, v, pk.MU_SUN, orbit.mu_self)
 
 # Table 2 Constants and unit conversions
-AU = 1.49597870691e8 # km
-#MU = 1.32712440018e11 # km^3/s^2 # TODO probably remove, dont need own sun object?
-SEC_PER_DAY = 86400 # s
-DAYS_PER_YEAR = 365.25 # days
+# TODO replace with pykep consts, just import in?
+AU = 1.49597870691e8 # km pk.AU
+#MU = 1.32712440018e11 # km^3/s^2 pk.MU_SUN
+SEC_PER_DAY = 86400 # s pk.DAY2SEC
+DAYS_PER_YEAR = 365.25 # days 1/pk.DAY2YEAR
 
 def spherical_to_cartesian(v):
     r"""Compute cartesian coordinates from spherical coordinates (norm, colat, long). This function is vectorized.
@@ -73,20 +74,8 @@ def spherical_to_cartesian(v):
     y = np.asarray(vsin[..., 0] * vsin[..., 1])
     z = np.asarray(vcos[..., 0])
     return norm_vecs * np.stack((x, y, z), axis=-1)
-
-def M_to_nu(M, ecc):
-    # TODO do we even need this??
-    # M: must be radians
-    # https://en.wikipedia.org/wiki/True_anomaly#From_the_mean_anomaly
-    nu = M + (2 * ecc - 0.25 * ecc**3) * np.sin(M) + 1.25 * (ecc**2) * np.sin(2*M) + (13./12.) * (ecc**3) * np.sin(3*M)
-    return nu
     
 class OrbitBuilder:
-    # Create my own Sun
-    #Sun = Body(
-    #    parent=None,
-    #    k = MU * (u.km ** 3 / u.s ** 2),
-    #    name="Sun")
 
     @classmethod
     def from_vectors(cls, r, v, epoch):
