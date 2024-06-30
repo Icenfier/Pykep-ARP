@@ -6,7 +6,8 @@ from space_util import (   # fixed or not?
     transfer_from_Earth,   # src not, uses not
     two_shot_transfer,     # src not, uses not
     START_EPOCH,           # src fixed, uses not
-    Earth                  # src fixed, uses not
+    Earth,                  # src fixed, uses not
+    propagate
 )
 
 from scipy.optimize import minimize,Bounds
@@ -39,7 +40,7 @@ class CommonProblem:
         self.upper = np.array(self.bounds)[:,1]
         # print(f'lower: {self.lower}\tupper: {self.upper}')
 
-    def to_Bounds(self):
+    def to_Bounds(self): 
         return Bounds(lb = self.lower, ub = self.upper)
 
     @classmethod
@@ -111,7 +112,7 @@ class Spaceship:
         self.get_ast_orbit = asteroids.get_orbit
         self.ast_list = []
         self.maneuvers = []
-        self.orbit = Earth.propagate(START_EPOCH)
+        self.orbit = propagate(Earth, START_EPOCH)
         self.x = np.array([])
         self.f = np.inf
 
@@ -120,7 +121,7 @@ class Spaceship:
         self.orbit = self.get_ast_orbit(ast_id)
         self.x = np.append(self.x, x)
         self.f += f
-        #print(f"f = {self.f}")
+        print(f"f = {self.f}")
         self.maneuvers.append(maneuvers)
 
     def optimize(self, ast_id, instance, **kwargs):

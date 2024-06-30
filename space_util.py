@@ -10,10 +10,10 @@ from pykep.core import DAY2SEC
 #from poliastro.bodies import Body
 #from poliastro.twobody import Orbit
 #from poliastro.frames import Planes
-#from poliastro.maneuver import Maneuver
+from poliastro.maneuver import Maneuver
 
-def to_timedelta(x):
-    return x * u.day
+#def to_timedelta(x):
+    #return x * u.day
 
 # The start time of earth and asteroids orbit.
 EARTH_START_EPOCH = def_epoch(59396,"mjd2000")
@@ -22,6 +22,8 @@ EARTH_START_EPOCH = def_epoch(59396,"mjd2000")
 START_EPOCH = def_epoch(95739,"mjd2000")
 # 00:00:00 1st January 2141 (MJD) (last launch)
 LAST_EPOCH = def_epoch(103044,"mjd2000")
+
+MAX_REVS = 0
 
 class Asteroids:
     def __init__(self, size, seed):
@@ -35,6 +37,7 @@ class Asteroids:
     def get_orbit(self, ast_id):
         orbit = self.ast_orbits.loc[ast_id]
         r, v = orbit.eph(START_EPOCH)
+        #return orbit.eph(START_EPOCH)
         return pk.planet.keplerian(START_EPOCH, r, v, pk.MU_SUN, orbit.mu_self)
 
 # Table 2 Constants and unit conversions
@@ -82,7 +85,7 @@ class OrbitBuilder:
         return Orbit.from_vectors(cls.Sun, r, v, epoch = epoch,
                                   plane = Planes.EARTH_ECLIPTIC)
     
-    def eliptic(a, e, i, raan, w, M, mass, epoch):
+    def eliptic(a, e, i, raan, w, M, mass, epoch):  
         return pk.planet.keplerian(epoch, (a * pk.AU, # AU
                                            e,         # no units
                                            i,         # rad
@@ -92,17 +95,17 @@ class OrbitBuilder:
                                     pk.MU_SUN, G*mass)
     
     
-    @classmethod
-    def circular(cls, a, i, raan, arglat, epoch):
-        return Orbit.circular(cls.Sun, alt = a * AU * u.km,
-                              inc = i * u.rad,
-                              raan = raan * u.rad,
-                              # Argument of latitude or phase.
-                              arglat = arglat * u.rad,
-                              epoch = epoch,
-                              # Same as HeliocentricEclipticJ2000
-                              # https://github.com/poliastro/poliastro/blob/main/src/poliastro/frames/util.py
-                              plane = Planes.EARTH_ECLIPTIC)
+#    @classmethod
+#    def circular(cls, a, i, raan, arglat, epoch):
+#        return Orbit.circular(cls.Sun, alt = a * AU * u.km,
+#                              inc = i * u.rad,
+#                              raan = raan * u.rad,
+#                              # Argument of latitude or phase.
+#                              arglat = arglat * u.rad,
+#                              epoch = epoch,
+#                              # Same as HeliocentricEclipticJ2000
+#                              # https://github.com/poliastro/poliastro/blob/main/src/poliastro/frames/util.py
+#                              plane = Planes.EARTH_ECLIPTIC)
 
 
 Earth = OrbitBuilder.eliptic(
@@ -116,6 +119,12 @@ Earth = OrbitBuilder.eliptic(
                 mass = 5.9722e24, # kg
                 epoch = EARTH_START_EPOCH) # epoch
 
+
+
+def propagate(body, epoch):
+    r, v = body.eph(epoch)
+    orbit = pk.planet.keplerian(epoch, r, v, pk.MU_SUN, body.mu_self)
+    return orbit
 
 
 def apply_impulse(orbit, dt = 0, dv = None):
@@ -153,21 +162,24 @@ def transfer_from_Earth(to_orbit, t0, t1, t2,
     
 
 def two_shot_transfer(from_orbit, to_orbit, t0, t1):
-    # TODO
+    # TODO do i even need propagation?
     assert t0 >= 0 and t1 > 0,f'It must be true that t0={t0} >= 0 and t1={t1} > 0'
-    from_orbit = from_orbit.propagate(from_orbit.epoch + to_timedelta(t0))
+    start_epoch = from_orbit.ref_mjd2000
+    from_orbit = propagate(from_orbit, def_epoch(start_epoch + t0))
     #print(f'from_orbit.epoch: {from_orbit.epoch}')
-    epoch = from_orbit.epoch + to_timedelta(t1)
-    to_orbit = to_orbit.propagate(epoch)
+    epoch = def_epoch(start_epoch + t0 + t1)
+    to_orbit = propagate(to_orbit, epoch)
     #assert epoch.value < LAST_EPOCH.value
     try:
-        man = Maneuver.lambert(from_orbit, to_orbit)
+        man = pk.lambert_problem(from_orbit.eph(start_epoch)[0], to_orbit.eph(epoch)[0], tof = t1, mu = pk.MU_SUN, cw = False, max_revs = MAX_REVS)
+        #man = Maneuver.lambert(from_orbit, to_orbit)
     except Exception as e:
         e.args = (e.args if e.args else tuple())
-        print(f'two_shot_transfer failed: {type(e)} {str(e.args)}: {from_orbit.rv()} {from_orbit.epoch} {to_orbit.rv()} {to_orbit.epoch} {t0} {t1}')
+        print(f'two_shot_transfer failed: {type(e)} {str(e.args)}: {from_orbit.eph(start_epoch)[0]} {start_epoch} {to_orbit.eph(epoch)[0]} {epoch} {t0} {t1}')
         # import dump
         # dump.to_pickle(prefix='two_shot_transfer_proposal', from_orbit=from_orbit, to_orbit=to_orbit, e=e)
         # Return a very bad solution
+        # TODO either find way of making bad lambert obj, or do exception wherever function called
         return (Maneuver((0 * u.s, [1e6, 1e6, 1e6] * u.km / u.s),
                          (LAST_EPOCH.value * SEC_PER_DAY * u.s, [1e6, 1e6, 1e6] * u.km / u.s)),
                 to_orbit)

@@ -22,24 +22,26 @@
 
 
 ## Week 2, 24/06
-### Mon
+### Mon, 6 hrs
 - AM: attempting to use planet module to replace orbit class, ran into issue with planet.keplerian
 - PM: more attempts to fix .keplerian, keep getting error "python argument types did not match C++ signature"
 -     changed a few epochs and angles
 
-### Tues
+### Tues, 6 hrs
 - AM: fixed .keplerian issue, the problem was with astropy units, switched to using scipy
 - PM: finished updating process_asteroids, now fully independent of poliastro
 -     looked into replacing orbit propagation
 
-### Wed
+### Wed, 8 hrs
 - AM: replacing Earth object in space_util. Ran into issues when running, managed to fix (was expecting cls input)
 - PM: completely replaced main space_util code (not all callable funcitions though)
 -     Asteroids class now works with Planet objects, including changing epoch times
 -     started looking at arp.py
 
-### Thurs
+### Thurs, 7 hrs
 - AM: figuring out which functions can be replaced by pykep functions, and which just need to be amended
 -     noting where functions are called
+- PM: working on space_util functions, meeting
 
-### Fri
+### Fri, 5.5 hrs
+- PM: looking through arp.py, sorting two_shot_tranfer lambert solutions
