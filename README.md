@@ -31,6 +31,10 @@
 - [ ] redo entire arp, (minimising function in slsqp, can make less "general")
   - [ ] combine CommonProblem and VisitProlem?
   - [ ] check i update pickle filename
+- [ ] check all pk.planet has input for planet radius
+- [ ] update .propagate to my own propagate function
+- [ ] better way for total dv cost?
+- [ ] selecting which transfer orbit per transfer ( multirev)
 
 
 ## Other objectives
@@ -71,8 +75,7 @@
 
 ## File: arp
 - [ ] space_util imports
-  - [ ] Asteroids
-  - [ ] to_timedelta         
+  - [ ] Asteroids         
   - [ ] transfer_from_Earth
   - [ ] two_shot_transfer
   - [ ] START_EPOCH
@@ -129,7 +132,8 @@
   - [ ] __init__(self, n, seed)
   - [ ] nearest_neighbor(self, x, distance)
   - [ ] get_euclidean_distance(self, from_id, to_id, time)
-  - [ ] _evaluate_transfer_orbit(self, from_orbit, to_orbit, current_time, t0, t1, only_cost, free_wait)
+  - [X] _evaluate_transfer_orbit(self, from_orbit, to_orbit, current_time, t0, t1, only_cost, free_wait)
+          - [ ] sort only_cost and free_wait
   - [ ] evaluate_transfer(self, from_id, to_id, current_time, t0, t1, only_cost = False, free_wait = False)
   - [ ] optimize_transfer_orbit_total_time(self, from_orbit, to_orbit, current_time, total_time_bounds,
                                            only_cost = False, free_wait = False)
@@ -143,3 +147,20 @@
   - [ ] build_nearest_neighbor(self, current_time)
   - [ ] evaluate_sequence(self, sequence, current_time)
   - [ ] fitness_nosave(self, x)
+  
+- [ ] better way for total dv cost?
+  
+  
+## File: transfer_example
+- [ ] arp_instance = AsteroidRoutingProblem()
+- [ ] arp_instance.CompleteSolution()
+  - [ ] Problem.check_permutation
+  - [ ] _Solution
+- [ ] arp_instance.evaluate_sequence()
+  - [ ] optimize_transfer_orbit
+    - [ ] inner_minimize_multistart
+- [ ] arp_instance.optimize_transfer()
+- [ ] arp_instance.build_nearest_neighbor()
+- [ ] arp_instance.evaluate_sequence()
+- [ ] arp_instance.optimize_transfer_total_time()
+- [ ] arp_instance.evaluate_transfer()

@@ -1,5 +1,11 @@
 import numpy as np
+import pykep as pk
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from pykep.orbit_plots import plot_planet, plot_lambert, plot_kepler
+from pykep import epoch as def_epoch
+from space_util import propagate, Asteroids
+from pykep.core import DAY2SEC
 
 #from poliastro.plotting import StaticOrbitPlotter
 #from poliastro.plotting.util import generate_label
@@ -10,6 +16,8 @@ from astropy.time import TimeDelta
 from space_util import (
     START_EPOCH,
     Earth,
+    perform_lambert,
+    switch_orbit
 )
 
 # From https://jwalton.info/Embed-Publication-Matplotlib-Latex/
@@ -56,27 +64,47 @@ def plot_solution(self, x, ax = None):
     x = np.asarray(x)
     sol = self.CompleteSolution(x)
     t = sol.ship.x
-    print(t)
-    frame = StaticOrbitPlotter(ax = ax, plane=Earth.plane)
+    #print(ast_orbits[0])
+    #print(t)
+    #frame = StaticOrbitPlotter(ax = ax, plane=Earth.plane)
     epoch = START_EPOCH
-    ship = Earth.propagate(epoch)
-    frame.plot(ship, label="Earth")
-        
+    ship = propagate(Earth, epoch)
+    
+    fig = plt.figure(figsize=((10,8)))
+    ax = fig.add_subplot(projection='3d')
+    plot_planet(ship, t0 = epoch, N = 60, units = 1.0, legend="Earth", axes = ax)
+    print(t)
     for k, (ast, man) in enumerate(zip(x,sol.ship.maneuvers)):
-        print(k)
-        print(ast)
-        print(man)
-        epoch += t[2*k]
-        ship = ship.propagate(epoch)
-        frame.plot_maneuver(ship, man, color = f'C{k+1}', label=generate_label(epoch, f'Impulse {k}'))
-        ship = ship.apply_maneuver(man)
-        epoch += t[2*k + 1]
+        #print(t)
+        #print(k)
+        #print(ast)
+        #print(man)
+        #print('pre-manuver: ', epoch)
+        #epoch = def_epoch(epoch.mjd2000 + t[2*k])
+        #print('mid maneuver: ', epoch)
+        to_orbit = self.get_ast_orbit(ast)
+        ship = propagate(ship, epoch)
+        plot_lambert(l = man, N = 100, sol = 0, color = f'C{k+1}', axes = ax) #legend=f'Impulse {k}', axes = ax) #label = generate_label(epoch, f'Impulse {k}'))
+        ship, r, v, epoch = perform_lambert(5e-6, man, epoch) # 5e-6 is mu, assuming ship mass ~ 100000kg
+        ship = switch_orbit(to_orbit, epoch)
+        #epoch = def_epoch(epoch.mjd2000 + t[2*k + 1])
+        #print('post-manuver: ', epoch)
         if 2*(k+1) >= len(t):
-            tofs = TimeDelta(0 * u.day)
+            tofs = 0
+            end_epoch = epoch
         else:
-            tofs = TimeDelta(np.linspace(0,  t[2*(k+1)] * u.day, num=100))
-        rr = propagate(ship, tofs)
-        frame.plot_trajectory(rr, color = f'C{k+1}',label=generate_label(epoch, f'Asteroid {ast}'))
+            #tofs = np.linspace(0,  t[2*(k+1)], num=100)
+            tofs = t[2*(k+1)]
+            end_epoch = (def_epoch(epoch.mjd2000+t[2*(k+1)]))
+
+        plot_planet(ship, t0 = epoch, tf = end_epoch, color = f'C{k+1}', axes=ax)#legend = True, axes = ax)#label=generate_label(epoch, f'Asteroid {ast}'))
+        #plot_kepler(r0=r, v0=v, tof = tofs*DAY2SEC, mu = pk.MU_SUN, color = f'C{k+1}', axes = ax) 
+        epoch = def_epoch(epoch.mjd2000+tofs)
+        ship = propagate(ship, epoch)#TODO sort all tis out
+        #print('post-asteroid: ', epoch)
+        
+        ax.view_init(90, -90) 
+        plt.draw()
 
     return ax, frame, sol.f, sol.get_cost(), sol.get_time()
 

@@ -15,6 +15,7 @@ def to_orbit(ast):
                                                     ast.w,         # rad
                                                     ast.M),        # rad
                                 pk.MU_SUN, G*ast.mass)
+    print(orbit)
     return orbit
 
 

@@ -1,8 +1,8 @@
 import numpy as np
 import pykep as pk
+from pykep.core import epoch as def_epoch
 from space_util import (   # fixed or not?
     Asteroids,             # src fixed, uses not
-    to_timedelta,          # src not, uses not
     transfer_from_Earth,   # src not, uses not
     two_shot_transfer,     # src not, uses not
     START_EPOCH,           # src fixed, uses not
@@ -30,7 +30,7 @@ class CommonProblem:
     TRANSFER_BOUNDS = (0., 730.) # (0 days, 2 years)
     VISIT_BOUNDS = (1., 730.) # (1 day, 2 years)
     #
-    cost_time_tradeoff = 2 / 30 # 2 km/s ~ 30 days
+    COST_TIME_TRADEOFF = 2 / 30 # 2 km/s ~ 30 days
 
     def __init__(self):
         self.best_x = np.empty(len(self.x0))
@@ -45,7 +45,7 @@ class CommonProblem:
 
     @classmethod
     def f(self, cost, time):
-        return cost + self.cost_time_tradeoff * time 
+        return cost + self.COST_TIME_TRADEOFF * time 
 
     def update_best(self, x, cost, time, man):
         f = self.f(cost, time)
@@ -73,13 +73,14 @@ class VisitProblem(CommonProblem):
         
     def __call__(self, x):
         man, to_orbit = two_shot_transfer(self.from_orbit, self.to_orbit, t0=x[0], t1=x[1])
-        cost = man.get_total_cost().value
+        cost = np.linalg.norm(man.get_v1()) + np.linalg.norm(man.get_v2())
         time = x.sum()
         f = self.update_best(x, cost, time, man)
         return f
 
 
 def inner_minimize_multistart(fun, multi, bounds, method = 'SLSQP', constraints = (), **kwargs):
+    # splitting into smaler chunks to find minima
     options = get_default_opts(method, **kwargs)
     best_f = np.inf
     best_t0 = None
@@ -133,18 +134,18 @@ class Spaceship:
         return self.visit(ast_id, **kwargs)
 
     def visit(self, ast_id, **kwargs):
-        epoch = START_EPOCH + to_timedelta(self.x.sum())
-        from_orbit = self.orbit.propagate(epoch)
+        epoch = def_epoch(START_EPOCH.mjd2000 + self.x.sum())
+        from_orbit = propagate(self.orbit, epoch)
         to_orbit = self.get_ast_orbit(ast_id)
         self.optimize(ast_id, VisitProblem(from_orbit, to_orbit), **kwargs)
         return self
 
     def get_energy_nearest(self, asteroids):
-        epoch = START_EPOCH + to_timedelta(self.x.sum())
-        ship = self.orbit.propagate(epoch)
+        epoch = def_epoch(START_EPOCH.mjd2000 + self.x.sum())
+        ship = propagate(self.orbit, epoch)
         ship_r = ship.r.to_value()[None, :] # Convert it to 1-row 3-cols matrix
         ship_v = ship.v.to_value()[None, :]
-        ast_orbits = [ self.get_ast_orbit(ast_id).propagate(epoch) for ast_id in asteroids ]
+        ast_orbits = [ propagate(self.get_ast_orbit(ast_id), epoch) for ast_id in asteroids ]
         ast_r = np.array([ orbit.r.to_value() for orbit in ast_orbits ])
         ast_v = np.array([ orbit.v.to_value() for orbit in ast_orbits ])
         ast_energy = (ast_v**2).sum(axis=1)/2 - pk.MU_SUN / np.linalg.norm(ast_r, axis=1)
@@ -157,10 +158,10 @@ class Spaceship:
         return asteroids[np.argmin(ast_dist)]
 
     def get_euclidean_nearest(self, asteroids):
-        epoch = START_EPOCH + to_timedelta(self.x.sum())
-        ship = self.orbit.propagate(epoch)
+        epoch = def_epoch(START_EPOCH.mjd2000 + self.x.sum())
+        ship = propagate(self.orbit, epoch)
         ship_r = ship.r.to_value()[None,:] # Convert it to 1-row 3-cols matrix
-        ast_r = np.array([ self.get_ast_orbit(ast_id).propagate(epoch).r.to_value() for ast_id in asteroids ])
+        ast_r = np.array([ propagate(self.get_ast_orbit(ast_id), epoch).r.to_value() for ast_id in asteroids ])
         ast_dist = distance.cdist(ship_r, ast_r, 'euclidean')
         return asteroids[np.argmin(ast_dist)]
 
@@ -261,15 +262,15 @@ class AsteroidRoutingProblem(Problem):
 
         time : time (relative to START_EPOCH).
         """
-        epoch = START_EPOCH + to_timedelta(time)
-        from_r = self.get_ast_orbit(from_id).propagate(epoch).r.to_value()
-        ast_r = np.array([ self.get_ast_orbit(ast_id).propagate(epoch).r.to_value() for ast_id in to_id ])
+        epoch = def_epoch(START_EPOCH.mjd2000 + time)
+        from_r = propagate(self.get_ast_orbit(from_id), epoch).r.to_value()
+        ast_r = np.array([ propagate(self.get_ast_orbit(ast_id), epoch).r.to_value() for ast_id in to_id ])
         return distance.cdist(from_r, ast_r, 'euclidean')
 
     def _evaluate_transfer_orbit(self, from_orbit, to_orbit, current_time, t0, t1, only_cost, free_wait):
         """Here t0 is relative to current_time and t1 is relative to current_time + t0"""
-        man, _ = two_shot_transfer(from_orbit, to_orbit, t0 = current_time + t0, t1=t1)
-        cost = man.get_total_cost().value
+        man, _ = two_shot_transfer(from_orbit, to_orbit, t0 = current_time + t0, t1=t1) # _is orbit after transfer
+        cost = np.linalg.norm(man.get_v1()) + np.linalg.norm(man.get_v2())
         assert not (only_cost and free_wait)
         if only_cost:
             return cost
@@ -333,9 +334,10 @@ class AsteroidRoutingProblem(Problem):
                                             only_cost = only_cost, free_wait = free_wait, multi = multi)
     
     def get_nearest_neighbor_euclidean(self, from_id, unvisited_ids, current_time):
-        epoch = START_EPOCH + to_timedelta(current_time)
-        from_r = self.get_ast_orbit(from_id).propagate(epoch).r.to_value()[None,:] # Convert it to 1-row 3-cols matrix
-        ast_r = np.array([ self.get_ast_orbit(ast_id).propagate(epoch).r.to_value() for ast_id in unvisited_ids ])
+        epoch = def_epoch(START_EPOCH.mjd2000 + current_time)
+        from_r = np.array([self.get_ast_orbit(from_id).eph(epoch)[0]])
+        ast_r = np.array([ self.get_ast_orbit(ast_id).eph(epoch)[0] for ast_id in unvisited_ids ])
+        print(ast_r)
         ast_dist = distance.cdist(from_r, ast_r, 'euclidean')
         return unvisited_ids[np.argmin(ast_dist)]
 

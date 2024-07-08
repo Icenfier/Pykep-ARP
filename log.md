@@ -45,3 +45,22 @@
 
 ### Fri, 5.5 hrs
 - PM: looking through arp.py, sorting two_shot_tranfer lambert solutions
+
+
+## Week 3, 01/07
+### Mon, 6 hrs
+-     more two_shot_transfer stuff, issue with replacing 'Maneuver' class with pykep .lambert_solution
+
+### Tues, 5 hrs
+- AM: fixing two_shot_transfer
+- PM: meeting, uni sent me mandatory employee training
+
+### Wed, 7 hrs
+- AM: trying to figure out how to get multirev solutions, it doesnt seem to give me any. ignoring for now (since realised issue, solved on thurs)
+- PM: updating all code called by transfer_example, transfer evaluation stuff.
+
+### Thurs, 8 hrs
+-     attempting plotting stuff. took embarassingly long to figure out that plot_lambert takes time of flight in seconds, not days
+
+### Fri, 5 hrs
+- AM: more plotting. got maneuvers to work, but not the waiting on asteroids.
