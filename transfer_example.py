@@ -2,25 +2,29 @@ from arp import AsteroidRoutingProblem
 from arp_vis import plot_solution
 from space_util import (
     two_shot_transfer,
-    START_EPOCH,
+    START_EPOCH
 )
 import numpy as np
 
 arp_instance = AsteroidRoutingProblem(10, 73)
 
+
 x = [9,3,8,7,2,6,1,5,4,0]
 res1 = arp_instance.CompleteSolution(np.asarray(x))
 res2 = arp_instance.evaluate_sequence([-1] + x, current_time=0)
+plot_solution(arp_instance, x)
+print(res1)
+print(res2)
 
-#res = plot_solution(arp_instance, [8,3,0,6,7,9,2,4,1,5])
-res1 = arp_instance.CompleteSolution(np.asarray([8,3,0,6,7,9,2,4,1,5]))
 
+res = plot_solution(arp_instance, [8,3,0,6,7,9,2,4,1,5])
+plot_solution(arp_instance, [8,3,0,6,7,9,2,4,1,5])
+res1 = arp_instance.CompleteSolution(np.asarray([8,3,0,6,7,9,2,4,1,5])) 
 res2 = arp_instance.evaluate_sequence([-1,8,3,0,6,7,9,2,4,1,5], current_time=0)
-
+print(res2)
 
 res = arp_instance.optimize_transfer(0, 8, current_time = 0, t0_bounds = (0, 5110), t1_bounds = (1, 730), free_wait = True, multi = 3)
-print(res)
-plot_solution(arp_instance, x)        
+print(res)  
 
 res = arp_instance.optimize_transfer(0, 8, current_time = 126.96358, t0_bounds = (0,4983.0366), t1_bounds = (1, 730), free_wait = True, multi = 3)
 print(res)        
@@ -30,10 +34,13 @@ print(res)
 
 res = arp_instance.optimize_transfer(0, 3, current_time = 69.746826, t0_bounds = (0,2120.2532), t1_bounds = (1, 730), free_wait = True, multi=4)
 print(res)        
+
  
 # Build nearest neighbor solution
 f, s, x = arp_instance.build_nearest_neighbor(current_time = 0)
 print(f"*** sequence = {s}, t = {x}, cost = {f}\n\n")
+plot_solution(arp_instance, s[1::])  
+
 f, x = arp_instance.evaluate_sequence(s, current_time = 0)
 print(f"*** t = {x}, cost = {f}\n\n")
 
@@ -42,6 +49,8 @@ print(res)
 
 res = arp_instance.optimize_transfer_total_time(1, 2, current_time = 574, total_time_bounds = (200,260))
 print(res)        
+
+
 
 from_id = -1 # From Earth
 to_id = 1
@@ -67,12 +76,13 @@ best = 10e6
 best_t1=-1
 for t1 in range(5, 730, 1):
     # man, _ = two_shot_transfer(arp_instance.get_ast_orbit(from_id), arp_instance.get_ast_orbit(to_id), t0=t0, t1=t1-t0)
-    # print(f"{t1}:{man.get_total_cost().value}")
+    # #print(f"{t1}:{man.get_total_cost().value}")
     result = arp_instance.evaluate_transfer(from_id, to_id, 0, t0, t1)
     if result < best:
         best = result
         best_t1 = t1
-    print(f"{t1}:{result}")
+        print(f"{t1}:{result}")
+    #print(f"{t1}:{result}")
 
 
 # Sequential one dimensional optimization
@@ -105,5 +115,4 @@ f, t0, t1 = arp_instance.optimize_transfer(-1, 9, 0, t0_bounds = (730,1000), t1_
 print(f"t0={t0}, t1={t1}, f={f}")
 
 f, t0, t1 = arp_instance.optimize_transfer(8, 1, 0, (0,730), (0.01,730))
-
-
+print(f"t0={t0}, t1={t1}, f={f}")

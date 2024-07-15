@@ -67,13 +67,14 @@ def plot_solution(self, x, ax = None):
     #print(ast_orbits[0])
     #print(t)
     #frame = StaticOrbitPlotter(ax = ax, plane=Earth.plane)
-    epoch = START_EPOCH
+    epoch = def_epoch(START_EPOCH.mjd2000 + t[0])
     ship = propagate(Earth, epoch)
     
     fig = plt.figure(figsize=((10,8)))
     ax = fig.add_subplot(projection='3d')
-    plot_planet(ship, t0 = epoch, N = 60, units = 1.0, legend="Earth", axes = ax)
-    print(t)
+    plot_planet(ship, t0 = epoch, N = 200, units = 1000, legend="Earth", axes = ax, color = 'black', alpha = 0.5)
+    ax.scatter(0,0,0, color='y', s = 70, axes = ax)
+    #print(t)
     for k, (ast, man) in enumerate(zip(x,sol.ship.maneuvers)):
         #print(t)
         #print(k)
@@ -84,9 +85,12 @@ def plot_solution(self, x, ax = None):
         #print('mid maneuver: ', epoch)
         to_orbit = self.get_ast_orbit(ast)
         ship = propagate(ship, epoch)
-        plot_lambert(l = man, N = 100, sol = 0, color = f'C{k+1}', axes = ax) #legend=f'Impulse {k}', axes = ax) #label = generate_label(epoch, f'Impulse {k}'))
+        #print('next ', epoch)
+        #plot_kepler(man.get_r1(), man.get_v1()[0], man.get_tof(), pk.MU_SUN, axes = ax)
+        plot_lambert(l = man, N = 200, units = 1000, sol = 0, color = f'C{k+1}',legend=False, axes = ax) #label = generate_label(epoch, f'Impulse {k}'))
         ship, r, v, epoch = perform_lambert(5e-6, man, epoch) # 5e-6 is mu, assuming ship mass ~ 100000kg
         ship = switch_orbit(to_orbit, epoch)
+        #print(epoch)
         #epoch = def_epoch(epoch.mjd2000 + t[2*k + 1])
         #print('post-manuver: ', epoch)
         if 2*(k+1) >= len(t):
@@ -97,16 +101,27 @@ def plot_solution(self, x, ax = None):
             tofs = t[2*(k+1)]
             end_epoch = (def_epoch(epoch.mjd2000+t[2*(k+1)]))
 
-        plot_planet(ship, t0 = epoch, tf = end_epoch, color = f'C{k+1}', axes=ax)#legend = True, axes = ax)#label=generate_label(epoch, f'Asteroid {ast}'))
+        plot_planet(ship, t0 = epoch, tf = end_epoch, units = 1000,  color = f'C{k+1}', legend = 'ast', axes = ax)#label=generate_label(epoch, f'Asteroid {ast}'))
+        #print(epoch)
         #plot_kepler(r0=r, v0=v, tof = tofs*DAY2SEC, mu = pk.MU_SUN, color = f'C{k+1}', axes = ax) 
         epoch = def_epoch(epoch.mjd2000+tofs)
-        ship = propagate(ship, epoch)#TODO sort all tis out
+        #print(epoch)
+        ship = propagate(ship, end_epoch)#TODO sort all tis out
+        ship_r = ship.eph(end_epoch)[0]
+        ax.scatter(ship_r[0]/1000, ship_r[1]/1000, ship_r[2]/1000, color = f'C{k+1}', s = 40, axes=ax)
         #print('post-asteroid: ', epoch)
         
+        fig.suptitle(f'$\Delta v$={sol.get_cost():.1f} km/s, $T$={sol.get_time():.1f} days, $f$={sol.f:.1f}', x=.58, y=0.94)
+        
+        xlim = max(abs(a) for a in ax.get_xlim3d())
+        ylim = max(abs(a) for a in ax.get_ylim3d())
+        maxlim = max(xlim, ylim) * 1.02
+        ax.set_xlim3d([-maxlim, maxlim])
+        ax.set_ylim3d([-maxlim, maxlim])
         ax.view_init(90, -90) 
         plt.draw()
 
-    return ax, frame, sol.f, sol.get_cost(), sol.get_time()
+    return ax, sol.f, sol.get_cost(), sol.get_time()
 
 def plot_solution_to_pdf(instance, sol, pdf_file, title = None, figsize = "lncs"):
     fig, ax = plt.subplots(figsize=get_fig_size(figsize, fraction=1))

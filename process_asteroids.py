@@ -15,7 +15,7 @@ def to_orbit(ast):
                                                     ast.w,         # rad
                                                     ast.M),        # rad
                                 pk.MU_SUN, G*ast.mass)
-    print(orbit)
+    #print(orbit)
     return orbit
 
 
@@ -30,5 +30,5 @@ assert EARTH_START_EPOCH.mjd2000 == _ast_epoch[0]
 asteroids.drop('epoch',  axis=1, inplace=True)
 deg_columns = ['i','raan','w','M'] 
 asteroids[deg_columns] = asteroids[deg_columns].transform(np.deg2rad)
-ast_orbits = asteroids.apply(to_orbit, axis=1)
+ast_orbits = asteroids.apply(to_orbit, axis=1) #TODO add naming? 
 ast_orbits.to_pickle("pykep_ast_orbits.pkl.gz")

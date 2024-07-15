@@ -64,3 +64,24 @@
 
 ### Fri, 5 hrs
 - AM: more plotting. got maneuvers to work, but not the waiting on asteroids.
+
+
+## Week 4, 08/07
+### Mon, 7 hrs
+- AM: checking transfer calculations, some minor changes. looking more at plotting
+- PM: meeting, creating graph outside of program to ensure I understand how the graphing functions work
+
+### Tues, 7 hrs
+- AM: checking all epochs to fix graph arcs not lining up
+- PM: calculating costs
+
+### Wed, 6 hrs
+-     trying to figure out why im getting bad results, mapping which functions lead where in arp.py
+
+### Thurs, 8 hrs
+- AM: fixing unit conversions, therefore fixing cost calculations and, by extension, results
+- PM: testing all functions in transfer_example
+
+### Fri, 5 hrs
+- AM: sorting out and updating markdown files
+- PM: a few minor changes in arp and space_util

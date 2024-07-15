@@ -14,27 +14,35 @@
 - [X] find alternative to orbit propagation (propagate.lagrangian OR planet.eph)
 - [ ] ensure all units correct
 - [ ] ensure start epochs correct (MJD2000)
-- [ ] ensure frame of reference is consistant (J2000 heliocentric ecliptic)
 - [X] process_asteroids
-- [ ] space_util, MU, MJD
-  - [ ] arp.py and arp_vis import stuff from space_util
+- [ ] space_util
+  - [ ] arp.py and arp_vis import stuff from space_util, remove unecessary imports
+  - [X] check two_shot_transfer
 - [ ] arp
-  - [ ] use pk.lambert_problem, pk.phasing.knn, pk.phasing.three_impulses_approx() OR pk.trajopt.pl2pl_N_impulses
-  - [ ] update all '.get_ast_orbit', look at where functions are called
-  - [ ] Spaceship.visit (from_orbit, VisitProblem)
-  - [ ] Spaceship.get_energy_nearest (orbit propagation)
+  - [X] use pk.lambert_problem, pk.phasing.knn, pk.phasing.three_impulses_approx() OR pk.trajopt.pl2pl_N_impulses
+  - [X] update all '.get_ast_orbit', look at where functions are called
+  - [X] Spaceship.visit (from_orbit, VisitProblem)
+  - [X] Spaceship.get_energy_nearest (orbit propagation)
 - [ ] arp_vis
-  - [ ] propagation
-  - [ ] plotting
+  - [X] propagation
+  - [X] plotting
 - [ ] Test with transfer_example
-  - [ ] check all files available
+  - [X] check all files available
 - [ ] redo entire arp, (minimising function in slsqp, can make less "general")
   - [ ] combine CommonProblem and VisitProlem?
-  - [ ] check i update pickle filename
-- [ ] check all pk.planet has input for planet radius
-- [ ] update .propagate to my own propagate function
-- [ ] better way for total dv cost?
-- [ ] selecting which transfer orbit per transfer ( multirev)
+  - [X] check i updated pickle filename
+- [X] check all pk.planet has input for planet radius
+- [X] update .propagate to my own propagate function
+- [X] better way for total dv cost
+- [ ] selecting which transfer orbit per transfer (multirev)
+- [X] figure out why results are bad (unit conversions)
+- [ ] add 'readable' option
+  - [ ] .evaluate_sequence()
+  - [ ] .optimize_transfer()
+  - [ ] .evaluate_sequence()
+  - [ ] .optimize_transfer_total_time()
+  - [ ] .evaluate_transfer()
+- [ ] add comments to explain code
 
 
 ## Other objectives
@@ -44,16 +52,15 @@
 - [ ] check imports, inc. importing specific functions
  
 ## File: space_util
-- [ ] poliastro replacements
+- [X] poliastro replacements
   - [X] spherical_to_cartesian (copied function from poliastro)
   - [X] M_to_E, E_to_nu (no longer needed, 'Planet' module requires M, not nu)
-  - [ ] Body, Orbit, Planes
-  - [ ] Maneuver
+  - [X] Body, Orbit, Planes
+  - [X] Maneuver
 - [X] astropy time (replaced with pk.epoch)
-- [ ] check epochs
+- [X] check epochs
 - [ ] constants and unit conversions (import pykep equivalents)
-- [ ] Asteroids get_orbit: propagate
-  - [ ] may not even need to propagate, find where function is called
+- [X] Asteroids get_orbit: propagate
 - [X] don't need M_to_nu
 - [ ] OrbitBuilder
   - [X] don't need Sun object
@@ -62,24 +69,20 @@
     - [X] eliptic
     - [X] circular (not needed, removed)
 - [X] Earth object, recreate as Planet
-- [ ] apply_impulse: .propagate, r&v, from_vectors(r, v + dv, tmp.epoch)
-  - [ ] called by launch_from_Earth
-- [ ] launch_from_Earth: .propagate, units
+- [ ] apply_impulse, launch_from_earth, transfer_from_earth. needed?
+  - [ ] apply_impulse: .propagate, r&v, from_vectors(r, v + dv, tmp.epoch)
+    - [ ] called by launch_from_Earth
+  - [ ] launch_from_Earth: .propagate, units
 	- [ ] calls apply_impulse
-	- [ ] called by transfer_from_earth
-- [ ] transfer_from_earth: poliastro spherical_to_cartesian nd Maneuver, epochs/to_timedelta, .propagate, to_orbit
+    - [ ] called by transfer_from_earth
+  - [ ] transfer_from_earth: poliastro spherical_to_cartesian nd Maneuver, epochs/to_timedelta, .propagate, to_orbit
 	- [ ] calls launch_from_Earth	
-- [ ] two_shot_transfer: from_orbit, to_orbit, .propagate, epochs, Maneuver
+- [X] two_shot_transfer: from_orbit, to_orbit, .propagate, epochs, Maneuver
 - [ ] check units!
 - [ ] MAX_REVS either set in space_util, or add as function input
 
 ## File: arp
 - [ ] space_util imports
-  - [ ] Asteroids         
-  - [ ] transfer_from_Earth
-  - [ ] two_shot_transfer
-  - [ ] START_EPOCH
-  - [ ] Earth 
 - [X] assert_bounds(x, bounds) (ensures all x0 within bounds)
         called by VisitProblem
 - [X] get_default_opts (allows various methods, currently set to slsqp)
@@ -93,74 +96,78 @@
   - [X] update_best(self, x, cost, time, man)
           called by VisitProblem __call__
   
-- [ ] VisitProblem(CommonProblem)
+- [X] VisitProblem(CommonProblem)
         called by Spaceship.visit
-  - [ ] __init__(self, from_orbit, to_orbit)
+  - [X] __init__(self, from_orbit, to_orbit)
           from_orbit, to_orbit
-  - [ ] __call__(self, x)
+  - [X] __call__(self, x)
 - [ ] inner_minimize_multistart(fun, multi, bounds, method = 'SLSQP', constraints = (), **kwargs)
+  - [ ] sort multi bounds
         called by AsteroidRoutingProblem.optimize_transfer_orbit
-- [ ] inner_minimize(fun, x0, bounds, method = 'SLSQP', constraints = (), **kwargs)
+- [X] inner_minimize(fun, x0, bounds, method = 'SLSQP', constraints = (), **kwargs)
         called by AsteroidRoutingProblem.optimize_transfer_orbit_total_time
-- [ ] optimize_problem(problem, method = 'SLSQP', **kwargs)
+- [X] optimize_problem(problem, method = 'SLSQP', **kwargs)
         called by Spaceship.optimize
 
 - [ ] Spaceship
   - [X] __init__(self, asteroids)
-  - [ ] add_ast(self, ast_id, x, f, maneuvers), f+=?
+  - [X] add_ast(self, ast_id, x, f, maneuvers)
           called by optimize
   - [X] optimize(self, ast_id, instance, **kwargs)
   - [X] launch(self, ast_id, **kwargs)
           called by AsteroidRoutingProblem._Solution.step
-  - [ ] visit(self, ast_id, **kwargs)
+  - [X] visit(self, ast_id, **kwargs)
   - [ ] get_energy_nearest(self, asteroids)
+    - [ ] only used by nearest_neighbor, alternative to build_nearest_neighbor
+      - [ ] ask if we want just euclidean dist. or if we want the option for energy
   - [ ] get_euclidean_nearest(self, asteroids)
   
-- [ ] from problem import Problem
 - [ ] AsteroidRoutingProblem(Problem)
-  - [ ] _Solution
-    - [ ] __init__(self, instance)
-    - [ ] step(self, k)
-    - [ ] x(self)
-    - [ ] f(self)
-    - [ ] get_cost(self)
-    - [ ] get_time(self)
-  - [ ] EmptySolution(self)
-  - [ ] CompleteSolution(self, x)
-  - [ ] PartialSolution(self, x)
-  - [ ] read_instance(cls, instance_name)
-  - [ ] __init__(self, n, seed)
+  - [X] _Solution
+    - [X] __init__(self, instance)
+    - [X] step(self, k)
+    - [X] x(self)
+    - [X] f(self)
+    - [X] get_cost(self)
+    - [X] get_time(self)
+  - [X] EmptySolution(self)
+  - [X] CompleteSolution(self, x)
+  - [ ] PartialSolution(self, x), used in nearest_neighbour calc
+  - [ ] read_instance(cls, instance_name) find where this is called
+  - [X] __init__(self, n, seed)
   - [ ] nearest_neighbor(self, x, distance)
-  - [ ] get_euclidean_distance(self, from_id, to_id, time)
+    - [ ] replace build_nearest_neighbor?
+    - [ ] update get_energy_nearest
+  - [ ] get_euclidean_distance(self, from_id, to_id, time) needed??
   - [X] _evaluate_transfer_orbit(self, from_orbit, to_orbit, current_time, t0, t1, only_cost, free_wait)
-          - [ ] sort only_cost and free_wait
-  - [ ] evaluate_transfer(self, from_id, to_id, current_time, t0, t1, only_cost = False, free_wait = False)
-  - [ ] optimize_transfer_orbit_total_time(self, from_orbit, to_orbit, current_time, total_time_bounds,
+  - [X] evaluate_transfer(self, from_id, to_id, current_time, t0, t1, only_cost = False, free_wait = False)
+  - [X] optimize_transfer_orbit_total_time(self, from_orbit, to_orbit, current_time, total_time_bounds,
                                            only_cost = False, free_wait = False)
-  - [ ] optimize_transfer_total_time(self, from_id, to_id, current_time, total_time_bounds,
+  - [X] optimize_transfer_total_time(self, from_id, to_id, current_time, total_time_bounds,
                                      only_cost = False, free_wait = False)
-  - [ ] optimize_transfer_orbit(self, from_orbit, to_orbit, current_time, t0_bounds, t1_bounds,
+  - [X] optimize_transfer_orbit(self, from_orbit, to_orbit, current_time, t0_bounds, t1_bounds,
                                 only_cost = False, free_wait = False, multi = 1)
-  - [ ] optimize_transfer(self, from_id, to_id, current_time, t0_bounds, t1_bounds,
+  - [X] optimize_transfer(self, from_id, to_id, current_time, t0_bounds, t1_bounds,
                           only_cost = False, free_wait = False, multi = 1)
-  - [ ] get_nearest_neighbor_euclidean(self, from_id, unvisited_ids, current_time)
-  - [ ] build_nearest_neighbor(self, current_time)
-  - [ ] evaluate_sequence(self, sequence, current_time)
+  - [X] get_nearest_neighbor_euclidean(self, from_id, unvisited_ids, current_time)
+  - [X] build_nearest_neighbor(self, current_time)
+  - [X] evaluate_sequence(self, sequence, current_time)
   - [ ] fitness_nosave(self, x)
   
 - [ ] better way for total dv cost?
+- [ ] combine some functions
   
   
 ## File: transfer_example
-- [ ] arp_instance = AsteroidRoutingProblem()
-- [ ] arp_instance.CompleteSolution()
-  - [ ] Problem.check_permutation
-  - [ ] _Solution
-- [ ] arp_instance.evaluate_sequence()
-  - [ ] optimize_transfer_orbit
-    - [ ] inner_minimize_multistart
-- [ ] arp_instance.optimize_transfer()
-- [ ] arp_instance.build_nearest_neighbor()
-- [ ] arp_instance.evaluate_sequence()
-- [ ] arp_instance.optimize_transfer_total_time()
-- [ ] arp_instance.evaluate_transfer()
+- [X] arp_instance = AsteroidRoutingProblem()
+- [X] arp_instance.CompleteSolution()
+  - [X] Problem.check_permutation
+  - [X] _Solution
+- [X] arp_instance.evaluate_sequence()
+  - [X] optimize_transfer_orbit
+    - [X] inner_minimize_multistart
+- [X] arp_instance.optimize_transfer()
+- [X] arp_instance.build_nearest_neighbor()
+- [X] arp_instance.evaluate_sequence()
+- [X] arp_instance.optimize_transfer_total_time()
+- [X] arp_instance.evaluate_transfer()

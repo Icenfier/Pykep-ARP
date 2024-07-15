@@ -17,7 +17,8 @@ from space_util import (
     EARTH_START_EPOCH,
     propagate,
     OrbitBuilder,
-    two_shot_transfer)
+    two_shot_transfer,
+    switch_orbit)
 
 START_EPOCH = def_epoch(95739,"mjd2000")
 MAX_REVS = 0
@@ -107,26 +108,33 @@ epoch = START_EPOCH
 ship = propagate(Earth, epoch)
 fig = plt.figure(figsize=((10,8)))
 ax = fig.add_subplot(projection='3d')
-#plot_planet(ship, t0 = epoch, N = 60, units = 1.0, legend="Earth", axes = ax)
 
 end_epoch = def_epoch(START_EPOCH.mjd2000+500)
-man1 = pk.lambert_problem(Earth.eph(START_EPOCH)[0], Ast1.eph(end_epoch)[0], tof = 500*DAY2SEC, mu = pk.MU_SUN, cw = False, max_revs = 2)
-#man, orb = two_shot_transfer(Earth, propagate(Ast, START_EPOCH), 0, 20)
-#plot_lambert(l=man1, axes = ax)
+man1 = pk.lambert_problem(Earth.eph(START_EPOCH)[0], Ast1.eph(end_epoch)[0], tof = 100*DAY2SEC, mu = pk.MU_SUN, cw = False, max_revs = 2)
+new_epoch = def_epoch(end_epoch.mjd2000+100)
+ship = switch_orbit(Ast1, end_epoch)
+plot_planet(ship, t0 = end_epoch, tf = new_epoch, axes = ax, legend = (True, 'ast'))
+plot_lambert(l=man1, axes = ax)
+print(man1.get_x())
 
-start_epoch = end_epoch
-end_epoch = def_epoch(end_epoch.mjd2000 + 500)
-man2 = pk.lambert_problem(Ast1.eph(start_epoch)[0], Ast2.eph(end_epoch)[0], tof = 500*DAY2SEC, mu = pk.MU_SUN, cw = False, max_revs = 2)
-#man, orb = two_shot_transfer(Earth, propagate(Ast, START_EPOCH), 0, 20)
-#plot_lambert(l=man2, axes = ax)
+start_epoch = new_epoch
+end_epoch = def_epoch(start_epoch.mjd2000 + 500)
+man2 = pk.lambert_problem(Ast1.eph(start_epoch)[0], Ast2.eph(end_epoch)[0], tof = 100*DAY2SEC, mu = pk.MU_SUN, cw = False, max_revs = 2)
+new_epoch = def_epoch(end_epoch.mjd2000+100)
+ship = switch_orbit(Ast2, end_epoch)
+plot_planet(ship, t0 = end_epoch, tf = new_epoch, axes = ax)
+plot_lambert(l=man2, axes = ax)
+print(man2.get_x())
 
-start_epoch = end_epoch
-end_epoch = def_epoch(end_epoch.mjd2000 + 500)
-man3 = pk.lambert_problem(Ast2.eph(start_epoch)[0], Ast3.eph(end_epoch)[0], tof = 500*DAY2SEC, mu = pk.MU_SUN, cw = False, max_revs = 2)
-#man, orb = two_shot_transfer(Earth, propagate(Ast, START_EPOCH), 0, 20)
-#plot_lambert(l=man3, axes = ax)
+start_epoch = new_epoch
+end_epoch = def_epoch(start_epoch.mjd2000 + 500)
+man3 = pk.lambert_problem(Ast2.eph(start_epoch)[0], Ast3.eph(end_epoch)[0], tof = 100*DAY2SEC, mu = pk.MU_SUN, cw = False, max_revs = 2)
+new_epoch = def_epoch(end_epoch.mjd2000+100)
+ship = switch_orbit(Ast3, end_epoch)
+plot_lambert(l=man3, axes = ax)
+print(man3.get_x())
 
-plot_kepler(Earth.eph(START_EPOCH)[0], Earth.eph(START_EPOCH)[1], tof = 100 * DAY2SEC, mu = pk.MU_SUN, axes = ax)
+plot_kepler(Earth.eph(START_EPOCH)[0], Earth.eph(START_EPOCH)[1], tof = 366 * DAY2SEC, mu = pk.MU_SUN, axes = ax, color = 'black')
 
 ax.view_init(90, 90) 
 plt.draw()
