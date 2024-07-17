@@ -15,26 +15,23 @@
 - [ ] ensure all units correct
 - [ ] ensure start epochs correct (MJD2000)
 - [X] process_asteroids
-- [ ] space_util
-  - [ ] arp.py and arp_vis import stuff from space_util, remove unecessary imports
-  - [X] check two_shot_transfer
+- [X] space_util
+  - [X] two_shot_transfer
 - [ ] arp
   - [X] use pk.lambert_problem, pk.phasing.knn, pk.phasing.three_impulses_approx() OR pk.trajopt.pl2pl_N_impulses
-  - [X] update all '.get_ast_orbit', look at where functions are called
   - [X] Spaceship.visit (from_orbit, VisitProblem)
-  - [X] Spaceship.get_energy_nearest (orbit propagation)
-- [ ] arp_vis
-  - [X] propagation
-  - [X] plotting
-- [ ] Test with transfer_example
-  - [X] check all files available
-- [ ] redo entire arp, (minimising function in slsqp, can make less "general")
+  - [ ] remove unecessary nearest neighbour functions
+  - [ ] nearest neighbour by orbital energy 
   - [ ] combine CommonProblem and VisitProlem?
-  - [X] check i updated pickle filename
+  - [ ] check free_wait and only_cost
+- [ ] arp_vis
+  - [X] epoch propagation
+  - [X] plotting
+  - [ ] add legend and labels
+- [X] Test with transfer_example
 - [X] check all pk.planet has input for planet radius
 - [X] update .propagate to my own propagate function
 - [X] better way for total dv cost
-- [ ] selecting which transfer orbit per transfer (multirev)
 - [X] figure out why results are bad (unit conversions)
 - [ ] add 'readable' option
   - [ ] .evaluate_sequence()
@@ -43,13 +40,21 @@
   - [ ] .optimize_transfer_total_time()
   - [ ] .evaluate_transfer()
 - [ ] add comments to explain code
+- [ ] remove unused imports
+- [X] SQSLP variants (removing wait time from obj. fun) (see build_nearest_neighbor only_cost)
+
 
 
 ## Other objectives
-- [ ] Investigating using SPICE for asteroids
 - [ ] using pykep for multirev Lambert
 - [ ] generalize orbit creation (process_asteroids.py to_orbit, space_util.py OrbitBuilder)
-- [ ] check imports, inc. importing specific functions
+- [ ] 'Orbital phasing indicators as heuristic estimators'
+  - [ ] greedy nearest neighbour heuristic for distances in above paper
+- [ ] Beam algorithms
+  - [ ] Beam-search
+  - [ ] Stochastic Beam
+  - [ ] Beam-P-ACO
+- [ ] convert to Python package
  
 ## File: space_util
 - [X] poliastro replacements
@@ -82,7 +87,6 @@
 - [ ] MAX_REVS either set in space_util, or add as function input
 
 ## File: arp
-- [ ] space_util imports
 - [X] assert_bounds(x, bounds) (ensures all x0 within bounds)
         called by VisitProblem
 - [X] get_default_opts (allows various methods, currently set to slsqp)

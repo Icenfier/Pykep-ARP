@@ -11,6 +11,8 @@ from arp import AsteroidRoutingProblem
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from pykep.orbit_plots import plot_planet, plot_lambert, plot_kepler
+from arp import CommonProblem
+from scipy.spatial import distance
 
 from space_util import (
     Earth,
@@ -69,7 +71,7 @@ class Asteroids:
 
 orbits = Asteroids(size)
 '''
-
+'''
 Ast1 = OrbitBuilder.eliptic(
                 # Table 1 Earth’s orbital elements in the J2000 heliocentric ecliptic reference frame
                 a = 3.23790035, # AU
@@ -138,3 +140,58 @@ plot_kepler(Earth.eph(START_EPOCH)[0], Earth.eph(START_EPOCH)[1], tof = 366 * DA
 
 ax.view_init(90, 90) 
 plt.draw()
+'''
+
+
+def build_nearest_neighbor(self, current_time, method): # AsteroidRoutingProblem
+    from_id = -1 # From Earth
+    unvisited_ids = np.arange(self.n)
+    f_total = 0.0
+    x = []
+    s = [ from_id ]
+    while len(unvisited_ids) > 0:
+        to_id = self.get_nearest_neighbor_euclidean(from_id = from_id, unvisited_ids = unvisited_ids, current_time = current_time)
+        f, t0, t1 = self.optimize_transfer(from_id, to_id, current_time, t0_bounds = CommonProblem.TRANSFER_BOUNDS, t1_bounds = CommonProblem.VISIT_BOUNDS)
+        unvisited_ids = np.setdiff1d(unvisited_ids, to_id)
+        f_total += f
+        #print(f'Departs from {from_id} at time {current_time + t0} after waiting {t0} days and arrives at {to_id} at time {current_time + t0 + t1} after travelling {t1} days, total cost = {f_total}')
+        from_id = to_id
+        x += [t0, t1]
+        s += [ to_id ]
+        current_time += t0 + t1
+    return (f_total, s, x)
+
+
+def get_nearest_neighbor_euclidean(self, from_id, unvisited_ids, current_time): # AsteroidRoutingProblem
+    epoch = def_epoch(START_EPOCH.mjd2000 + current_time)
+    from_r = np.array([self.get_ast_orbit(from_id).eph(epoch)[0]])
+    ast_r = np.array([ self.get_ast_orbit(ast_id).eph(epoch)[0] for ast_id in unvisited_ids ])
+    ast_dist = distance.cdist(from_r, ast_r, 'euclidean')
+    return unvisited_ids[np.argmin(ast_dist)]
+
+def get_nearest_neighbor_energy(self, from_id, unvisited_ids, current_time):
+    #epoch = def_epoch(START_EPOCH.mjd2000 + current_time)
+    from_orbit = self.get_ast_orbit(from_id)
+    ast_orbits = np.array([self.get_ast_orbit(ast_id) for ast_id in unvisited_ids])
+    from_energy = -pk.MU_SUN / (2*from_orbit.orbital_elements[0]) # orbital_elements =[0] is semi-major axis
+    ast_energies = -pk.MU_SUN / (2*ast_orbits.orbital_elements[0])# approximation that solar mass >> asteroid mass
+    energy_diff = np.array([np.linalg.norm(np.subtract(from_energy, ast_energy)) for ast_energy in ast_energies])
+    return unvisited_ids[np.argmin(energy_diff)]
+
+
+def get_energy_nearest(self, asteroids): # Spaceship
+    epoch = def_epoch(START_EPOCH.mjd2000 + self.x.sum())
+    ship = propagate(self.orbit, epoch)
+    ship_r = ship.r.to_value()[None, :] # Convert it to 1-row 3-cols matrix
+    ship_v = ship.v.to_value()[None, :]
+    ast_orbits = [ propagate(self.get_ast_orbit(ast_id), epoch) for ast_id in asteroids ]
+    ast_r = np.array([ orbit.r.to_value() for orbit in ast_orbits ])
+    ast_v = np.array([ orbit.v.to_value() for orbit in ast_orbits ])
+    ast_energy = (ast_v**2).sum(axis=1)/2 - pk.MU_SUN / np.linalg.norm(ast_r, axis=1)
+    ship_energy = (ship_v**2).sum(axis=1) / 2 - pk.MU_SUN / np.linalg.norm(ship_r, axis=1)
+    energy_difference = np.abs(ast_energy - ship_energy)
+    ast_dist = distance.cdist(ship_r, ast_r, 'euclidean')
+    #print(f'diff_r[0]={ast_dist[0]}, energy_diff[0]={energy_difference[0]}')
+    ast_dist /= 1.5e+8
+    ast_dist += 0.1 * energy_difference
+    return asteroids[np.argmin(ast_dist)]

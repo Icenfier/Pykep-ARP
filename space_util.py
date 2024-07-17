@@ -1,7 +1,6 @@
 import numpy as np
 from numpy import deg2rad
 import pykep as pk
-from astropy import units as u
 from scipy.constants import G
 from pykep.core import epoch as def_epoch
 from pykep.core import DAY2SEC

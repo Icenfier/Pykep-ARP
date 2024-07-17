@@ -85,3 +85,26 @@
 ### Fri, 5 hrs
 - AM: sorting out and updating markdown files
 - PM: a few minor changes in arp and space_util
+
+
+## Week 5, 15/07
+### Mon, 
+- AM: combining and deleting unnecesary functions
+- PM: formatting plot
+
+### Tues, 
+- AM: creating option for nearest neighbour by energy
+- PM: adding to plot_solution to allow input of previously calculated solutions
+-     changing a bunch of stuff in optimization functions so that maneuvers can be returned
+-     plot_solution can now either plot pre-existing solutions, or calculate solutions itself given an asteroid sequence 
+
+### Wed, 
+-     
+
+### Thurs, 
+- AM: 
+- PM: 
+
+### Fri, 
+- AM: 
+- PM: 
