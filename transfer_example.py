@@ -1,6 +1,7 @@
 from arp import AsteroidRoutingProblem
 from arp_vis import plot_solution
 import numpy as np
+from cego import cego
 
 arp_instance = AsteroidRoutingProblem(10, 73)
 
@@ -32,6 +33,8 @@ res, from_orbit, to_orbit = arp_instance.optimize_transfer(0, 3, current_time = 
 print(res)        
 
 '''
+# NOTE THAT FREE_WAIT STILL MINIMISES F BUT ONLY_COST MINIMISES COST
+#TODO ask about above
 # Build nearest neighbor solution
 (f, s, x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0)
 print(f"*** sequence = {s}, t = {x}, cost = {f}\n\n")
@@ -43,16 +46,17 @@ plot_solution(arp_instance, s[1::], f=f, times=x, mans=maneuvers, costs=costs)
 print(f"*** sequence = {s}, t = {x}, cost = {f}\n\n")
 plot_solution(arp_instance, s[1::], f=f, times=x, mans=maneuvers, costs=costs) 
 
-(f,s,x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0, method='energy')
+'''
+(f,s,x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0, metric='energy')
 print(f"*** sequence = {s}, t = {x}, cost = {f}\n\n")
 plot_solution(arp_instance, s[1::], f=f, times=x, mans=maneuvers, costs=costs)  
-(f,s,x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0, method='energy', free_wait = True)
+(f,s,x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0, metric='energy', free_wait = True)
 print(f"*** sequence = {s}, t = {x}, cost = {f}\n\n")
 plot_solution(arp_instance, s[1::], f=f, times=x, mans=maneuvers, costs=costs)  
-(f,s,x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0, method='energy', only_cost = True)
+(f,s,x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0, metric='energy', only_cost = True)
 print(f"*** sequence = {s}, t = {x}, cost = {f}\n\n")
 plot_solution(arp_instance, s[1::], f=f, times=x, mans=maneuvers, costs=costs)  
-
+'''
 '''
 f, x = arp_instance.evaluate_sequence(s, current_time = 0)
 print(f"*** t = {x}, cost = {f}\n\n")

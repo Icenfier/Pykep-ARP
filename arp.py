@@ -276,6 +276,26 @@ class AsteroidRoutingProblem(Problem):
         return self.optimize_transfer_orbit(from_orbit, to_orbit, current_time, t0_bounds, t1_bounds,
                                             only_cost = only_cost, free_wait = free_wait, multi = multi), from_orbit, to_orbit
     
+    def get_nearest_neighbor(self, x, metric):
+        
+        
+        def nearest_neighbor(self, x, distance):
+            # This could be optimized to avoid re-evaluating
+            sol = self.PartialSolution(x)
+            if distance == "euclidean":
+                get_next = sol.ship.get_euclidean_nearest
+            elif distance == "energy":
+                get_next = sol.ship.get_energy_nearest
+            else:
+                raise ValueError("Unknown distance " + distance)
+            
+            ast_list = list(set(range(self.n)) - set(sol.x))
+            while ast_list:
+                k = get_next(ast_list)
+                ast_list.remove(k)
+                sol.step(k)
+
+            return sol.x, sol.f
     def get_nearest_neighbor_euclidean(self, from_id, unvisited_ids, current_time):
         epoch = def_epoch(START_EPOCH.mjd2000 + current_time)
         from_r = np.array([self.get_ast_orbit(from_id).eph(epoch)[0]])
@@ -293,11 +313,11 @@ class AsteroidRoutingProblem(Problem):
         energy_diff = np.array([np.linalg.norm(np.subtract(from_energy, ast_energy)) for ast_energy in ast_energies])
         return unvisited_ids[np.argmin(energy_diff)]
 
-    def build_nearest_neighbor(self, current_time, method = 'euclidean', free_wait = False, only_cost = False):
+    def build_nearest_neighbor(self, current_time, metric = 'euclidean', free_wait = False, only_cost = False):
         """method optional, defaults to euclidean"""
-        if method == 'euclidean':
+        if metric == 'euclidean':
             get_nearest_neighbor = self.get_nearest_neighbor_euclidean
-        elif method == 'energy':
+        elif metric == 'energy':
             get_nearest_neighbor = self.get_nearest_neighbor_energy
         else:
             print('Invalid nearest neighbor method. Check documentation for list of methods')

@@ -15,6 +15,7 @@
 - [ ] ensure all units correct
 - [ ] ensure start epochs correct (MJD2000)
 - [X] process_asteroids
+  - [ ] check if original GTOC asteroid file contains asteroid names
 - [X] space_util
   - [X] two_shot_transfer
 - [ ] arp
@@ -42,11 +43,15 @@
 - [ ] add comments to explain code
 - [ ] remove unused imports
 - [X] SQSLP variants (removing wait time from obj. fun) (see build_nearest_neighbor only_cost)
-
-
+- [ ] copyright and credit stuff
+- [ ] update to reflect changes:
+  - [ ] cego.py (nearest_neighbor)
+    - [ ] install R and rpy2?
+  - [ ] umm.py
+  - [ ] greedy_nn
 
 ## Other objectives
-- [ ] using pykep for multirev Lambert
+- [ ] acessing multirev Lambert, choosing best multirev results
 - [ ] generalize orbit creation (process_asteroids.py to_orbit, space_util.py OrbitBuilder)
 - [ ] 'Orbital phasing indicators as heuristic estimators'
   - [ ] greedy nearest neighbour heuristic for distances in above paper
@@ -54,124 +59,94 @@
   - [ ] Beam-search
   - [ ] Stochastic Beam
   - [ ] Beam-P-ACO
+- [ ] add path details so I can better organise files?
+- [ ] add global cache? would help avoid reevaluation, can use to access maneuvers without having to explicitly return them?
 - [ ] convert to Python package
+
+## Repository: beam_paco_gtoc5
+https://github.com/lfsimoes/beam_paco__gtoc5
+- [ ] figure out which files are needed/useful
+  - [ ] gtoc5
+    - [ ] to replace/use in constants.py (ignoring any GTOC5 specific):
+      - [ ] MU_SUN = 1.32712440018e11 * 1000**3
+      - [ ] AU = 1.49597870691e8 * 1000
+      - [ ] G0 = 9.80665
+      - [ ] Average Earth velocity, m/s
+            EARTH_VELOCITY = sqrt(MU_SUN / AU)
+      - [ ] DAY2SEC = 86400.0
+      - [ ] SEC2DAY = 1.0 / DAY2SEC
+      - [ ] YEAR2DAY = 365.25
+      - [ ] DAY2YEAR = 1.0 / YEAR2DAY
+      - [ ] Earth's Keplerian orbital parameters
+            _earth_op = (
+            	pk.epoch(54000, 'mjd'),     # t
+            	0.999988049532578 * AU,     # a
+            	1.67168116316e-2,           # e
+            	radians(8.854353079654e-4), # i
+            	radians(175.40647696473),   # W
+            	radians(287.61577546182),   # w
+            	radians(257.60683707535)    # M
+            	)
+            earth = pk.planet.keplerian(_earth_op[0], _earth_op[1:],
+                                        MU_SUN, 398601.19 * 1000**3, 0, 0, 'Earth')
+      - [ ] bounds (days) in which to search for a rendezvous leg's dT
+            rvleg_dT_bounds = [60., 500.]
+    useful:
+    - [X] __init__.py (imports constants and gtoc5.py functions)
+    - [ ] gtoc5.py (global cache, can look for potential improvements to arp code)
+    - [ ] lambert.py (acessing multirev solutions, some optimization)
+    - [ ] multiobjective.py (probably not actually useful, but look into pareto front stuff)
+    - [ ] phasing.py (as expected, phasing stuff)
+    not:
+    - [X] ast_ephem.py (same purpose as process_asteroids)
+    - [X] ast_ephem.txt (specific to GTOC5)
+    - [X] bestiary.py (specific to GTOC5 sequences)
+    - [X] mass_optimal_1st_leg.pkl, time_optimal_1st_leg.pkl (specific to GTOC5)
+  - [ ] paco
+    - [X] __init__.py (imports paco)
+    - [ ] paco.py (use all, allows paco and beam_paco runs, pareto_elite not implemented?)
+  - [ ] experiments__paco.py (sets up experimental parameters)
+  - [ ] experiments.py
+  - [ ] paco.traj.py
+  - [ ] traj.video.ipynb
+  - [ ] usage_demos.ipynb
+  
+- [ ] install/replace/update required libraries
+  - [ ] pykep<2
+  - [ ] numpy
+  - [ ] scipy
+  - [ ] tqdm
+  - [ ] pandas
+  - [ ] matplotlib
+  - [ ] seaborn
+  - [ ] watermark
  
 ## File: space_util
-- [X] poliastro replacements
-  - [X] spherical_to_cartesian (copied function from poliastro)
-  - [X] M_to_E, E_to_nu (no longer needed, 'Planet' module requires M, not nu)
-  - [X] Body, Orbit, Planes
-  - [X] Maneuver
-- [X] astropy time (replaced with pk.epoch)
-- [X] check epochs
-- [ ] constants and unit conversions (import pykep equivalents)
-- [X] Asteroids get_orbit: propagate
-- [X] don't need M_to_nu
-- [ ] OrbitBuilder
-  - [X] don't need Sun object
-  - [ ] replace Orbit class
-    - [ ] from_vectors
-    - [X] eliptic
-    - [X] circular (not needed, removed)
-- [X] Earth object, recreate as Planet
-- [ ] apply_impulse, launch_from_earth, transfer_from_earth. needed?
-  - [ ] apply_impulse: .propagate, r&v, from_vectors(r, v + dv, tmp.epoch)
-    - [ ] called by launch_from_Earth
-  - [ ] launch_from_Earth: .propagate, units
-	- [ ] calls apply_impulse
-    - [ ] called by transfer_from_earth
-  - [ ] transfer_from_earth: poliastro spherical_to_cartesian nd Maneuver, epochs/to_timedelta, .propagate, to_orbit
-	- [ ] calls launch_from_Earth	
-- [X] two_shot_transfer: from_orbit, to_orbit, .propagate, epochs, Maneuver
+- [ ] check constants and unit conversions (pykep equivalents)
+- [ ] OrbitBuilder, combine with process_asteroids 'to_orbit'? 
 - [ ] check units!
 - [ ] MAX_REVS either set in space_util, or add as function input
 
 ## File: arp
-- [X] assert_bounds(x, bounds) (ensures all x0 within bounds)
-        called by VisitProblem
-- [X] get_default_opts (allows various methods, currently set to slsqp)
-        called by inner_minimize_multistart, inner_minimize, optimize_problem
-
-- [X] CommonProblem
-  - [X] __init__(self)
-  - [X] to_Bounds(self), do we need this?? not called
-  - [X] f(self, cost, time)
-          called by update_best
-  - [X] update_best(self, x, cost, time, man)
-          called by VisitProblem __call__
-  
-- [X] VisitProblem(CommonProblem)
-        called by Spaceship.visit
-  - [X] __init__(self, from_orbit, to_orbit)
-          from_orbit, to_orbit
-  - [X] __call__(self, x)
 - [ ] inner_minimize_multistart(fun, multi, bounds, method = 'SLSQP', constraints = (), **kwargs)
   - [ ] sort multi bounds
         called by AsteroidRoutingProblem.optimize_transfer_orbit
-- [X] inner_minimize(fun, x0, bounds, method = 'SLSQP', constraints = (), **kwargs)
+- [ ] inner_minimize(fun, x0, bounds, method = 'SLSQP', constraints = (), **kwargs)
+  -[ ] update so results can be plotted?
         called by AsteroidRoutingProblem.optimize_transfer_orbit_total_time
-- [X] optimize_problem(problem, method = 'SLSQP', **kwargs)
-        called by Spaceship.optimize
-
-- [ ] Spaceship
-  - [X] __init__(self, asteroids)
-  - [X] add_ast(self, ast_id, x, f, maneuvers)
-          called by optimize
-  - [X] optimize(self, ast_id, instance, **kwargs)
-  - [X] launch(self, ast_id, **kwargs)
-          called by AsteroidRoutingProblem._Solution.step
-  - [X] visit(self, ast_id, **kwargs)
-  - [ ] get_energy_nearest(self, asteroids)
-    - [ ] only used by nearest_neighbor, alternative to build_nearest_neighbor
-      - [ ] ask if we want just euclidean dist. or if we want the option for energy
-  - [ ] get_euclidean_nearest(self, asteroids)
-  
 - [ ] AsteroidRoutingProblem(Problem)
-  - [X] _Solution
-    - [X] __init__(self, instance)
-    - [X] step(self, k)
-    - [X] x(self)
-    - [X] f(self)
-    - [X] get_cost(self)
-    - [X] get_time(self)
-  - [X] EmptySolution(self)
-  - [X] CompleteSolution(self, x)
-  - [ ] PartialSolution(self, x), used in nearest_neighbour calc
   - [ ] read_instance(cls, instance_name) find where this is called
-  - [X] __init__(self, n, seed)
-  - [ ] nearest_neighbor(self, x, distance)
-    - [ ] replace build_nearest_neighbor?
-    - [ ] update get_energy_nearest
-  - [ ] get_euclidean_distance(self, from_id, to_id, time) needed??
-  - [X] _evaluate_transfer_orbit(self, from_orbit, to_orbit, current_time, t0, t1, only_cost, free_wait)
-  - [X] evaluate_transfer(self, from_id, to_id, current_time, t0, t1, only_cost = False, free_wait = False)
-  - [X] optimize_transfer_orbit_total_time(self, from_orbit, to_orbit, current_time, total_time_bounds,
-                                           only_cost = False, free_wait = False)
-  - [X] optimize_transfer_total_time(self, from_id, to_id, current_time, total_time_bounds,
-                                     only_cost = False, free_wait = False)
-  - [X] optimize_transfer_orbit(self, from_orbit, to_orbit, current_time, t0_bounds, t1_bounds,
-                                only_cost = False, free_wait = False, multi = 1)
-  - [X] optimize_transfer(self, from_id, to_id, current_time, t0_bounds, t1_bounds,
-                          only_cost = False, free_wait = False, multi = 1)
-  - [X] get_nearest_neighbor_euclidean(self, from_id, unvisited_ids, current_time)
-  - [X] build_nearest_neighbor(self, current_time)
-  - [X] evaluate_sequence(self, sequence, current_time)
   - [ ] fitness_nosave(self, x)
   
-- [ ] better way for total dv cost?
-- [ ] combine some functions
-  
+- [ ] combine optimise functions
+- [ ] maybe replace nearest neighbor with pk.phasing.knn
   
 ## File: transfer_example
-- [X] arp_instance = AsteroidRoutingProblem()
-- [X] arp_instance.CompleteSolution()
-  - [X] Problem.check_permutation
-  - [X] _Solution
-- [X] arp_instance.evaluate_sequence()
-  - [X] optimize_transfer_orbit
-    - [X] inner_minimize_multistart
-- [X] arp_instance.optimize_transfer()
-- [X] arp_instance.build_nearest_neighbor()
-- [X] arp_instance.evaluate_sequence()
-- [X] arp_instance.optimize_transfer_total_time()
-- [X] arp_instance.evaluate_transfer()
+- [ ] ensure all can be plotted:
+  - [ ] arp_instance.CompleteSolution()
+  - [ ] arp_instance.evaluate_sequence()
+  - [ ] arp_instance.optimize_transfer()
+  - [X] arp_instance.build_nearest_neighbor()
+  - [ ] arp_instance.evaluate_sequence()
+  - [ ] arp_instance.optimize_transfer_total_time()
+  - [ ] arp_instance.evaluate_transfer()

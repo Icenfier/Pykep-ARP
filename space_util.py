@@ -40,40 +40,6 @@ SEC_PER_DAY = 86400 # s pk.DAY2SEC
 DAYS_PER_YEAR = 365.25 # days 1/pk.DAY2YEAR
 
 
-'''
-def spherical_to_cartesian(v):
-    r"""Compute cartesian coordinates from spherical coordinates (norm, colat, long). This function is vectorized.
-
-    .. math::
-
-       v = norm \cdot \begin{bmatrix}
-       \sin(colat)\cos(long)\\
-       \sin(colat)\sin(long)\\
-       \cos(colat)\\
-       \end{bmatrix}
-
-    Parameters
-    ----------
-    v : numpy.ndarray
-        Spherical coordinates in 3D (norm, colat, long). Angles must be in radians.
-
-    Returns
-    -------
-    v : numpy.ndarray
-        Cartesian coordinates (x,y,z)
-
-    """
-    v = np.asarray(v)
-    norm_vecs = np.expand_dims(np.asarray(v[..., 0]), -1)
-    vsin = np.sin(v[..., 1:3])
-    vcos = np.cos(v[..., 1:3])
-    x = np.asarray(vsin[..., 0] * vcos[..., 1])
-    y = np.asarray(vsin[..., 0] * vsin[..., 1])
-    z = np.asarray(vcos[..., 0])
-    return norm_vecs * np.stack((x, y, z), axis=-1)
-    
-'''
-
 class OrbitBuilder:
     
     def eliptic(a, e, i, raan, w, M, mass, epoch):  
@@ -116,41 +82,6 @@ def perform_lambert(mu_self, lambert, epoch):
     end_epoch = def_epoch(epoch.mjd2000 + lambert.get_tof()/DAY2SEC)
     body = pk.planet.keplerian(end_epoch, rf, vf, pk.MU_SUN, mu_self, 0.1, 0.1) # 0.1 values for required 'planet radius' input, doesnt affect anything
     return body, rf, vf, end_epoch
-
-'''
-def apply_impulse(orbit, dt = 0, dv = None):
-    # TODO
-    tmp = orbit
-    if dt > 0:
-        tmp = tmp.propagate(dt)
-    r, v = tmp.rv()
-    return OrbitBuilder.from_vectors(r, v + dv, tmp.epoch)
-
-def launch_from_Earth(launch_epoch, launch_v):
-    # TODO
-    intermediate_orbit = apply_impulse(Earth.propagate(launch_epoch),
-                                       dt = 0,
-                                       dv = launch_v * (u.km / u.s))
-    return intermediate_orbit
-
-
-def transfer_from_Earth(to_orbit, t0, t1, t2,
-                      # (v_norm, v_colat, v_long)
-                      v_cartesian = None, v_spherical = None):
-    # TODO
-    v = v_cartesian
-    if v is None:
-        v = spherical_to_cartesian(v_spherical)
-        
-    launch_epoch = def_epoch(START_EPOCH.mjd2000 + t0)
-    intermediate_orbit = launch_from_Earth(launch_epoch, launch_v = v)
-    intermediate_orbit = intermediate_orbit.propagate(launch_epoch + to_timedelta(t1))
-    epoch = START_EPOCH + to_timedelta(t0 + t1 + t2)
-    assert epoch.value < LAST_EPOCH.value
-    to_orbit = to_orbit.propagate(epoch)
-    mann = Maneuver.lambert(intermediate_orbit, to_orbit)
-    return mann, to_orbit
-'''  
 
 def two_shot_transfer(from_orbit, to_orbit, t0, t1):
     # ENSURE from_orbit IS AT REFERENCE ORBIT BEFORE CALLING

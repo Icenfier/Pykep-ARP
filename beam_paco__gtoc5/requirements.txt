@@ -1,0 +1,8 @@
+pykep<2
+numpy
+scipy
+tqdm
+pandas
+matplotlib
+seaborn
+watermark
