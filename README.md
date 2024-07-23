@@ -29,6 +29,7 @@
   - [X] epoch propagation
   - [X] plotting
   - [ ] add legend and labels
+  - [ ] optional 3D
 - [X] Test with transfer_example
 - [X] check all pk.planet has input for planet radius
 - [X] update .propagate to my own propagate function
@@ -49,6 +50,8 @@
     - [ ] install R and rpy2?
   - [ ] umm.py
   - [ ] greedy_nn
+- [ ] add **kwargs to cego and such for free_wait and only_cost?
+- [ ] free_wait and only_cost as inputs for plot
 
 ## Other objectives
 - [ ] acessing multirev Lambert, choosing best multirev results
@@ -68,19 +71,19 @@ https://github.com/lfsimoes/beam_paco__gtoc5
 - [ ] figure out which files are needed/useful
   - [ ] gtoc5
     - [ ] to replace/use in constants.py (ignoring any GTOC5 specific):
-      - [ ] MU_SUN = 1.32712440018e11 * 1000**3
-      - [ ] AU = 1.49597870691e8 * 1000
-      - [ ] G0 = 9.80665
+      - [X] MU_SUN = pk.M_SUN
+      - [X] AU = pk.AU
+      - [X] G0 = pk.G0
       - [ ] Average Earth velocity, m/s
             EARTH_VELOCITY = sqrt(MU_SUN / AU)
-      - [ ] DAY2SEC = 86400.0
-      - [ ] SEC2DAY = 1.0 / DAY2SEC
-      - [ ] YEAR2DAY = 365.25
-      - [ ] DAY2YEAR = 1.0 / YEAR2DAY
+      - [X] DAY2SEC = pk.DAY2SEC
+      - [X] SEC2DAY = pk.SEC2DAY
+      - [X] YEAR2DAY = 1/pk.YEAR2DAY
+      - [X] DAY2YEAR = pk.DAY2YEAR
       - [ ] Earth's Keplerian orbital parameters
             _earth_op = (
             	pk.epoch(54000, 'mjd'),     # t
-            	0.999988049532578 * AU,     # a
+            	0.999988049532578 * AU,     # a 
             	1.67168116316e-2,           # e
             	radians(8.854353079654e-4), # i
             	radians(175.40647696473),   # W
@@ -89,8 +92,6 @@ https://github.com/lfsimoes/beam_paco__gtoc5
             	)
             earth = pk.planet.keplerian(_earth_op[0], _earth_op[1:],
                                         MU_SUN, 398601.19 * 1000**3, 0, 0, 'Earth')
-      - [ ] bounds (days) in which to search for a rendezvous leg's dT
-            rvleg_dT_bounds = [60., 500.]
     useful:
     - [X] __init__.py (imports constants and gtoc5.py functions)
     - [ ] gtoc5.py (global cache, can look for potential improvements to arp code)
@@ -99,7 +100,7 @@ https://github.com/lfsimoes/beam_paco__gtoc5
     - [ ] phasing.py (as expected, phasing stuff)
     not:
     - [X] ast_ephem.py (same purpose as process_asteroids)
-    - [X] ast_ephem.txt (specific to GTOC5)
+    - [X] ast_ephem.txt (specfic to GTOC5)
     - [X] bestiary.py (specific to GTOC5 sequences)
     - [X] mass_optimal_1st_leg.pkl, time_optimal_1st_leg.pkl (specific to GTOC5)
   - [ ] paco
@@ -135,7 +136,7 @@ https://github.com/lfsimoes/beam_paco__gtoc5
   -[ ] update so results can be plotted?
         called by AsteroidRoutingProblem.optimize_transfer_orbit_total_time
 - [ ] AsteroidRoutingProblem(Problem)
-  - [ ] read_instance(cls, instance_name) find where this is called
+  - [X] read_instance(cls, instance_name) called by runner, creates arp instance
   - [ ] fitness_nosave(self, x)
   
 - [ ] combine optimise functions

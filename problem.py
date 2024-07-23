@@ -19,10 +19,11 @@ class Problem:
             if worst_fitness != None:
                 assert self.worst_fitness == worst_fitness
         self.reset()
+        pass
 
-    def check_permutation(self, x):
+    def check_permutation(self, sequence):
         # Assumes numpy array
-        return ((x >= 0) & (x < self.n)).all() and np.unique(x).shape[0] == x.shape[0]
+        return ((sequence >= 0) & (sequence < self.n)).all() and np.unique(sequence).shape[0] == sequence.shape[0]
 
     def reset(self):
         self.evaluations = []

@@ -51,27 +51,22 @@ def get_fig_size(width, fraction=1, subplots=(1, 1), ratio = (5**.5 - 1) / 2):
     return (fig_width_in, fig_height_in)
 
 
-def plot_solution(self, sequence, f = False, times = False, mans = False, costs = False, ax = None):
+def plot_solution(self, sequence, sol=False, ax = None):
+    #TODO can so replace all this with sol obj.
     fig = plt.figure(figsize=((10,8)))
     ax = fig.add_subplot(projection='3d')
     if sequence[0] < 0 :
         return ax, np.inf, np.inf, np.inf
     sequence = np.asarray(sequence)
-    
-    if times and mans and costs:
-        t = times
-        maneuvers = mans
-        cost = sum(costs)
-        tot_time = sum(times)
-    else:
+    if not sol:
+        print('Solution not provided. Sequence will be evaluated before plotting.')
         sol = self.CompleteSolution(sequence)
-        t = sol.ship.x
-        maneuvers = sol.ship.maneuvers
-        cost = sol.get_cost()
-        tot_time = sol.get_time()
-    #print(ast_orbits[0])
-    #print(t)
-    #frame = StaticOrbitPlotter(ax = ax, plane=Earth.plane)
+    f = sol.f
+    t = sol.ship.leg_times
+    maneuvers = sol.ship.maneuvers
+    cost = sol.get_cost()
+    tot_time = sol.get_time()
+    
     epoch = def_epoch(START_EPOCH.mjd2000 + t[0])
     ship = propagate(Earth, epoch)
     

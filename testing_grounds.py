@@ -11,7 +11,7 @@ from arp import AsteroidRoutingProblem
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from pykep.orbit_plots import plot_planet, plot_lambert, plot_kepler
-from arp import CommonProblem
+from arp import VisitProblem
 from scipy.spatial import distance
 
 from space_util import (

@@ -1,16 +1,28 @@
 from arp import AsteroidRoutingProblem
+from arp import Spaceship###
 from arp_vis import plot_solution
 import numpy as np
-from cego import cego
+from space_util import Earth, propagate###
+from pykep import epoch as def_epoch###
+
+
+
 
 arp_instance = AsteroidRoutingProblem(10, 73)
 
-'''
+#####
+ship = Spaceship(arp_instance.asteroids)
+from_orbit = Earth
+to_orbit = propagate(ship.get_ast_orbit(3), Earth.ref_epoch)
+ship.optimize(3, from_orbit, to_orbit)
+#####
+
+
 x = [9,3,8,7,2,6,1,5,4,0]
 res1 = arp_instance.CompleteSolution(np.asarray(x))
 res2 = arp_instance.evaluate_sequence([-1] + x, current_time=0)
 plot_solution(arp_instance, x)
-print(res1)
+#print(res1)
 print(res2)
 
 
@@ -20,52 +32,50 @@ res1 = arp_instance.CompleteSolution(np.asarray([8,3,0,6,7,9,2,4,1,5]))
 res2 = arp_instance.evaluate_sequence([-1,8,3,0,6,7,9,2,4,1,5], current_time=0)
 print(res2)
 
-res, from_orbit, to_orbit = arp_instance.optimize_transfer(0, 8, current_time = 0, t0_bounds = (0, 5110), t1_bounds = (1, 730), free_wait = True, multi = 3)
-print(res)  
+solution = arp_instance.optimize_transfer(0, 8, current_time = 0, t0_bounds = (0, 5110), t1_bounds = (1, 730), free_wait = True, multi = 3)
+print(solution)  
 
-res, from_orbit, to_orbit = arp_instance.optimize_transfer(0, 8, current_time = 126.96358, t0_bounds = (0,4983.0366), t1_bounds = (1, 730), free_wait = True, multi = 3)
-print(res)        
+solution = arp_instance.optimize_transfer(0, 8, current_time = 126.96358, t0_bounds = (0,4983.0366), t1_bounds = (1, 730), free_wait = True, multi = 3)
+print(solution)        
 
-res, from_orbit, to_orbit = arp_instance.optimize_transfer(0, 3, current_time = 0, t0_bounds = (0, 13870), t1_bounds = (1, 730), free_wait = True, multi=3)
-print(res)        
+solution = arp_instance.optimize_transfer(0, 3, current_time = 0, t0_bounds = (0, 13870), t1_bounds = (1, 730), free_wait = True, multi=3)
+print(solution)        
 
-res, from_orbit, to_orbit = arp_instance.optimize_transfer(0, 3, current_time = 69.746826, t0_bounds = (0,2120.2532), t1_bounds = (1, 730), free_wait = True, multi=4)
-print(res)        
+solution = arp_instance.optimize_transfer(0, 3, current_time = 69.746826, t0_bounds = (0,2120.2532), t1_bounds = (1, 730), free_wait = True, multi=4)
+print(solution)        
 
-'''
 # NOTE THAT FREE_WAIT STILL MINIMISES F BUT ONLY_COST MINIMISES COST
 #TODO ask about above
 # Build nearest neighbor solution
-(f, s, x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0)
-print(f"*** sequence = {s}, t = {x}, cost = {f}\n\n")
-plot_solution(arp_instance, s[1::], f=f, times=x, mans=maneuvers, costs=costs)  
-(f, s, x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0, free_wait = True)
-print(f"*** sequence = {s}, t = {x}, cost = {f}\n\n")
-plot_solution(arp_instance, s[1::], f=f, times=x, mans=maneuvers, costs=costs) 
-(f, s, x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0, only_cost = True)
-print(f"*** sequence = {s}, t = {x}, cost = {f}\n\n")
-plot_solution(arp_instance, s[1::], f=f, times=x, mans=maneuvers, costs=costs) 
+sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0)
+print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
+plot_solution(arp_instance, sequence[1::], sol)  
+sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, free_wait = True)
+print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
+plot_solution(arp_instance, sequence[1::], sol)  
+sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, only_cost = True)
+print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
+plot_solution(arp_instance, sequence[1::],  sol)
 
-'''
-(f,s,x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0, metric='energy')
-print(f"*** sequence = {s}, t = {x}, cost = {f}\n\n")
-plot_solution(arp_instance, s[1::], f=f, times=x, mans=maneuvers, costs=costs)  
-(f,s,x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0, metric='energy', free_wait = True)
-print(f"*** sequence = {s}, t = {x}, cost = {f}\n\n")
-plot_solution(arp_instance, s[1::], f=f, times=x, mans=maneuvers, costs=costs)  
-(f,s,x), maneuvers, costs = arp_instance.build_nearest_neighbor(current_time = 0, metric='energy', only_cost = True)
-print(f"*** sequence = {s}, t = {x}, cost = {f}\n\n")
-plot_solution(arp_instance, s[1::], f=f, times=x, mans=maneuvers, costs=costs)  
-'''
-'''
-f, x = arp_instance.evaluate_sequence(s, current_time = 0)
+sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, metric='energy')
+print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
+plot_solution(arp_instance, sequence[1::],  sol)  
+sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, metric='energy', free_wait = True)
+print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
+plot_solution(arp_instance, sequence[1::],  sol)  
+sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, metric='energy', only_cost = True)
+print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
+plot_solution(arp_instance, sequence[1::],  sol)  
+
+
+f, x = arp_instance.evaluate_sequence(sequence, current_time = 0)
 print(f"*** t = {x}, cost = {f}\n\n")
 
-res, from_orbit, to_orbit = arp_instance.optimize_transfer(1, 2, current_time = 574, t0_bounds = (0, 1), t1_bounds = (240, 260))
-print(res)        
+solution = arp_instance.optimize_transfer(1, 2, current_time = 574, t0_bounds = (0, 1), t1_bounds = (240, 260))
+print(solution)        
 
-res, from_orbit, to_orbit = arp_instance.optimize_transfer_total_time(1, 2, current_time = 574, total_time_bounds = (200,260))
-print(res)        
+solution = arp_instance.optimize_transfer(1, 2, current_time = 574, total_time_bounds = (200,260))
+print(solution)        
 
 
 
@@ -122,15 +132,14 @@ best, man = arp_instance.evaluate_transfer(from_id, to_id, 0, int(res.x[0]), int
 print(best)
 
 # Simpler:
-(f, t0, t1), from_orbit, to_orbit = arp_instance.optimize_transfer(from_id, to_id, 0, t0_bounds = (0,730), t1_bounds = (1,730))
-print(f"t0={t0}, t1={t1}, f={f}")
+solution = arp_instance.optimize_transfer(from_id, to_id, 0, t0_bounds = (0,730), t1_bounds = (1,730))
+print(f"t0={solution.ship.leg_times[0]}, t1={solution.ship.leg_times[1]}, f={solution.f}")
 
-(f, t0, t1), from_orbit, to_orbit = arp_instance.optimize_transfer(from_id, to_id, 0, t0_bounds = (0,730), t1_bounds = (1,730), free_wait = True)
-print(f"t0={t0}, t1={t1}, f={f}")
+solution = arp_instance.optimize_transfer(from_id, to_id, 0, t0_bounds = (0,730), t1_bounds = (1,730), free_wait = True)
+print(f"t0={solution.ship.leg_times[0]}, t1={solution.ship.leg_times[1]}, f={solution.f}")
 
-(f, t0, t1), from_orbit, to_orbit = arp_instance.optimize_transfer(-1, 9, 0, t0_bounds = (730,1000), t1_bounds = (1,730))
-print(f"t0={t0}, t1={t1}, f={f}")
+solution = arp_instance.optimize_transfer(-1, 9, 0, t0_bounds = (730,1000), t1_bounds = (1,730))
+print(f"t0={solution.ship.leg_times[0]}, t1={solution.ship.leg_times[1]}, f={solution.f}")
 
-(f, t0, t1), from_orbit, to_orbit = arp_instance.optimize_transfer(8, 1, 0, (0,730), (0.01,730))
-print(f"t0={t0}, t1={t1}, f={f}")
-'''
+solution = arp_instance.optimize_transfer(8, 1, 0, t0_bounds = (0,730), t1_bounds = (0.01,730))
+print(f"t0={solution.ship.leg_times[0]}, t1={solution.ship.leg_times[1]}, f={solution.f}")

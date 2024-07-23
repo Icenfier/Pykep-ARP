@@ -14,8 +14,7 @@ def to_orbit(ast):
                                                     ast.raan,      # rad
                                                     ast.w,         # rad
                                                     ast.M),        # rad
-                                pk.MU_SUN, G*ast.mass)
-    #print(orbit)
+                                pk.MU_SUN, G*ast.mass, 0, 0)
     return orbit
 
 

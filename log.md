@@ -88,23 +88,46 @@
 
 
 ## Week 5, 15/07
-### Mon, 
+### Mon, 7 hrs
 - AM: combining and deleting unnecesary functions
 - PM: formatting plot
 
-### Tues, 
+### Tues, 6 hrs
 - AM: creating option for nearest neighbour by energy
 - PM: adding to plot_solution to allow input of previously calculated solutions
 -     changing a bunch of stuff in optimization functions so that maneuvers can be returned
 -     plot_solution can now either plot pre-existing solutions, or calculate solutions itself given an asteroid sequence 
 
-### Wed, 
--     
+### Wed, 6.5 hrs
+- AM: reading paper on beam search and p-aco https://arxiv.org/pdf/1704.00702
+- PM: researching beam searches and ant colony optimisation
 
-### Thurs, 
+### Thurs, 8 hrs
+- AM: realising that cego.py, and most likely umm.py, calls functions that I have altered/removed. added fixing this to todo list
+- PM: downloading and looking at beam paco repository, working out which functions will be useful and which are too specific
+-     https://github.com/lfsimoes/beam_paco__gtoc5
+
+### Fri, 7 hrs
+- AM: using PACO code to fix a few things in my own code
+- PM: testing PACO code to see how different functions work
+
+
+## Week 6, 22/07
+### Mon, 
+-     reorganising arp.py, using ship object for plotting without the need for re-evaluation
+
+### Tues,
 - AM: 
 - PM: 
 
-### Fri, 
+### Wed, 
+- AM: 
+- PM: 
+
+### Thurs, 
+- AM:  
+- PM: 
+
+### Fri,
 - AM: 
 - PM: 

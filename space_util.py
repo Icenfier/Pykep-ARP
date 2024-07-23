@@ -30,14 +30,14 @@ class Asteroids:
         orbit = self.ast_orbits.loc[ast_id]
         r, v = orbit.eph(START_EPOCH)
         #return orbit.eph(START_EPOCH)
-        return pk.planet.keplerian(START_EPOCH, r, v, pk.MU_SUN, orbit.mu_self, 0.1, 0.1) # 0.1 values for 'planet radius', needed to function but have no practical use
+        return pk.planet.keplerian(START_EPOCH, r, v, pk.MU_SUN, orbit.mu_self, 0, 0) # 0.1 values for 'planet radius', needed to function but have no practical use
 
 # Table 2 Constants and unit conversions
 # TODO replace with pykep consts, just import in?
-AU = 1.49597870691e8 # km pk.AU
+#AU = 1.49597870691e8 # km pk.AU
 #MU = 1.32712440018e11 # km^3/s^2 pk.MU_SUN
-SEC_PER_DAY = 86400 # s pk.DAY2SEC
-DAYS_PER_YEAR = 365.25 # days 1/pk.DAY2YEAR
+#SEC_PER_DAY = 86400 # s pk.DAY2SEC
+#DAYS_PER_YEAR = 365.25 # days 1/pk.DAY2YEAR
 
 
 class OrbitBuilder:
@@ -49,7 +49,7 @@ class OrbitBuilder:
                                            raan,      # rad
                                            w,         # rad
                                            M),        # rad
-                                    pk.MU_SUN, G*mass)
+                                    pk.MU_SUN, G*mass, 0, 0, 'Earth')
 
 
 Earth = OrbitBuilder.eliptic(
