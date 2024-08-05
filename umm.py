@@ -127,12 +127,13 @@ def UMM(instance, seed, budget, m_ini, eval_ranks, init,
       fitnesses = [f_eval(perm) for perm in sample]
 
     elif init == "greedy_euclidean":
-      x0, f = instance.nearest_neighbor(np.full(n, -1, dtype=int), distance="euclidean")
+      sol, x0 = instance.build_nearest_neighbor(current_time=0, metric='euclidean')
+      #x0, f = instance.nearest_neighbor(np.full(n, -1, dtype=int), distance="euclidean")
       if not eval_ranks:
         x0 = np.argsort(x0)
       sample = design_maxmindist(m_ini, n, distance = mk.distance, x0 = x0)
       # avoid double evaluation
-      fitnesses = [ f ] + [ f_eval(perm) for perm in sample[1:] ]
+      fitnesses = [ sol.f ] + [ f_eval(perm) for perm in sample[1:] ]
 
     else:
       raise ValueError(f"Invalid init: {init}")

@@ -15,7 +15,7 @@ START_EPOCH = def_epoch(95739,"mjd2000")
 # 00:00:00 1st January 2141 (MJD) (last launch)
 LAST_EPOCH = def_epoch(103044,"mjd2000")
 
-MAX_REVS = 2
+MAX_REVS = 10
 
 class Asteroids:
     def __init__(self, size, seed):
@@ -76,13 +76,6 @@ def switch_orbit(to_orbit, epoch):
     body = pk.planet.keplerian(epoch, r, v, pk.MU_SUN, to_orbit.mu_self, 0.1, 0.1) # 0.1 values for required 'planet radius' input, doesnt affect anything
     return body
 
-def perform_lambert(mu_self, lambert, epoch):
-    rf = lambert.get_r2()
-    vf = lambert.get_v2()[0]
-    end_epoch = def_epoch(epoch.mjd2000 + lambert.get_tof()/DAY2SEC)
-    body = pk.planet.keplerian(end_epoch, rf, vf, pk.MU_SUN, mu_self, 0.1, 0.1) # 0.1 values for required 'planet radius' input, doesnt affect anything
-    return body, rf, vf, end_epoch
-
 def two_shot_transfer(from_orbit, to_orbit, t0, t1):
     # ENSURE from_orbit IS AT REFERENCE ORBIT BEFORE CALLING
     assert t0 >= 0 and t1 > 0,f'It must be true that t0={t0} >= 0 and t1={t1} > 0'
@@ -115,7 +108,9 @@ def two_shot_transfer(from_orbit, to_orbit, t0, t1):
     return man, from_orbit, to_orbit
 
 def calc_cost(man, from_orbit, to_orbit):
+    tof = man.get_tof()/DAY2SEC
+    to_orbit = propagate(to_orbit, def_epoch(from_orbit.ref_epoch.mjd2000 + tof))
     cost_dv1 = np.linalg.norm(np.subtract(man.get_v1()[0], from_orbit.eph(from_orbit.ref_epoch)[1]))
     cost_dv2 = np.linalg.norm(np.subtract(to_orbit.eph(to_orbit.ref_epoch)[1], man.get_v2()[0]))
-    cost = np.linalg.norm(cost_dv1) + np.linalg.norm(cost_dv2) # in m
+    cost = cost_dv1 + cost_dv2 # in m
     return cost/1000 # in km

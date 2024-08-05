@@ -21,9 +21,9 @@
 - [ ] arp
   - [X] use pk.lambert_problem, pk.phasing.knn, pk.phasing.three_impulses_approx() OR pk.trajopt.pl2pl_N_impulses
   - [X] Spaceship.visit (from_orbit, VisitProblem)
-  - [ ] remove unecessary nearest neighbour functions
+  - [X] remove unecessary nearest neighbour functions
   - [ ] nearest neighbour by orbital energy 
-  - [ ] combine CommonProblem and VisitProlem?
+  - [X] combine CommonProblem and VisitProlem?
   - [ ] check free_wait and only_cost
 - [ ] arp_vis
   - [X] epoch propagation
@@ -35,7 +35,7 @@
 - [X] update .propagate to my own propagate function
 - [X] better way for total dv cost
 - [X] figure out why results are bad (unit conversions)
-- [ ] add 'readable' option
+- [ ] add 'readable' option?
   - [ ] .evaluate_sequence()
   - [ ] .optimize_transfer()
   - [ ] .evaluate_sequence()
@@ -46,12 +46,13 @@
 - [X] SQSLP variants (removing wait time from obj. fun) (see build_nearest_neighbor only_cost)
 - [ ] copyright and credit stuff
 - [ ] update to reflect changes:
-  - [ ] cego.py (nearest_neighbor)
+  - [X] cego.py (nearest_neighbor)
     - [ ] install R and rpy2?
-  - [ ] umm.py
-  - [ ] greedy_nn
+  - [X] umm.py
+  - [X] greedy_nn
+  - [X] random_search
 - [ ] add **kwargs to cego and such for free_wait and only_cost?
-- [ ] free_wait and only_cost as inputs for plot
+- [ ] free_wait and only_cost as inputs for plot?
 
 ## Other objectives
 - [ ] acessing multirev Lambert, choosing best multirev results
@@ -63,7 +64,6 @@
   - [ ] Stochastic Beam
   - [ ] Beam-P-ACO
 - [ ] add path details so I can better organise files?
-- [ ] add global cache? would help avoid reevaluation, can use to access maneuvers without having to explicitly return them?
 - [ ] convert to Python package
 
 ## Repository: beam_paco_gtoc5
@@ -131,15 +131,13 @@ https://github.com/lfsimoes/beam_paco__gtoc5
 ## File: arp
 - [ ] inner_minimize_multistart(fun, multi, bounds, method = 'SLSQP', constraints = (), **kwargs)
   - [ ] sort multi bounds
-        called by AsteroidRoutingProblem.optimize_transfer_orbit
 - [ ] inner_minimize(fun, x0, bounds, method = 'SLSQP', constraints = (), **kwargs)
   -[ ] update so results can be plotted?
-        called by AsteroidRoutingProblem.optimize_transfer_orbit_total_time
-- [ ] AsteroidRoutingProblem(Problem)
+- [X] AsteroidRoutingProblem(Problem) - combined arp and problem
   - [X] read_instance(cls, instance_name) called by runner, creates arp instance
-  - [ ] fitness_nosave(self, x)
+  - [X] fitness_nosave(self, x)
   
-- [ ] combine optimise functions
+- [X] combine optimise functions
 - [ ] maybe replace nearest neighbor with pk.phasing.knn
   
 ## File: transfer_example

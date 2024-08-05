@@ -21,6 +21,7 @@
 - PM: Replacing angle conversions
 
 
+
 ## Week 2, 24/06
 ### Mon, 6 hrs
 - AM: attempting to use planet module to replace orbit class, ran into issue with planet.keplerian
@@ -47,6 +48,7 @@
 - PM: looking through arp.py, sorting two_shot_tranfer lambert solutions
 
 
+
 ## Week 3, 01/07
 ### Mon, 6 hrs
 -     more two_shot_transfer stuff, issue with replacing 'Maneuver' class with pykep .lambert_solution
@@ -64,6 +66,7 @@
 
 ### Fri, 5 hrs
 - AM: more plotting. got maneuvers to work, but not the waiting on asteroids.
+
 
 
 ## Week 4, 08/07
@@ -85,6 +88,7 @@
 ### Fri, 5 hrs
 - AM: sorting out and updating markdown files
 - PM: a few minor changes in arp and space_util
+
 
 
 ## Week 5, 15/07
@@ -112,22 +116,42 @@
 - PM: testing PACO code to see how different functions work
 
 
+
 ## Week 6, 22/07
-### Mon, 
+### Mon, 8.5 hrs
 -     reorganising arp.py, using ship object for plotting without the need for re-evaluation
 
-### Tues,
-- AM: 
-- PM: 
+### Tues, 6 hrs
+- AM: finishing fixing arp.py
+- PM: writing code to read in preexisting results before performing the simulation itself, allowing a comparison
 
-### Wed, 
-- AM: 
-- PM: 
+### Wed, 6 hrs
+- AM: compared pykep and poliastro results, euclidean matches pretty much perfectly, energy calculated differently
+- PM: fixed delta v calculations
 
-### Thurs, 
-- AM:  
-- PM: 
+### Thurs, 7 hrs
+- AM: trying to install and use rpy2 to test cego.py, wouldn't install properly
+- PM: fixing cego so arp instances are called properly
 
-### Fri,
-- AM: 
-- PM: 
+### Fri, 5hrs
+-     fixing umm.py and random_search.py so arp instances are called properly
+
+
+
+## Week 7, 29/07
+### Mon, 7 hrs
+- AM: fixed incorrect epoch that was causing a difference in final cost and cost used for f calculations
+- PM: wrote function to compare poliastro and pykep random_search results
+
+### Tues, 8 hrs
+-     added much better, customisable plotting, finalised legend
+
+### Wed, 7 hrs
+-     allowed for either 2d or 3d projection when plotting
+
+### Thurs, 7 hrs
+- AM: overwrote knn.py _init_ so that code actually runs
+- PM: implemented knn phasing into greedynn 
+
+### Fri, 6hrs
+-     started looking into implementing beam search

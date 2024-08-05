@@ -209,7 +209,7 @@ def cego(instance, seed, budget, m_ini, budgetGA, eval_ranks, dist_name, init):
     r_fitness = make_r_fitness(instance)
 
     if init == "greedy_euclidean":
-        x, _ = instance.build_nearest_neighbor(current_time=0, metric='euclidean')
+        _, x = instance.build_nearest_neighbor(current_time=0, metric='euclidean')
         #nearest_neighbor(np.full(instance.n, -1, dtype=int), distance="euclidean")
         if not eval_ranks:
             x = np.argsort(x)

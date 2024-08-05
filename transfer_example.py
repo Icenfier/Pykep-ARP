@@ -1,73 +1,64 @@
 from arp import AsteroidRoutingProblem
-from arp import Spaceship###
 from arp_vis import plot_solution
 import numpy as np
-from space_util import Earth, propagate###
-from pykep import epoch as def_epoch###
 
-
-
+projection = '2d' # 2d for normal plotting, 3d if plot can be opened in new window (%matplotlib qt)
 
 arp_instance = AsteroidRoutingProblem(10, 73)
-
-#####
-ship = Spaceship(arp_instance.asteroids)
-from_orbit = Earth
-to_orbit = propagate(ship.get_ast_orbit(3), Earth.ref_epoch)
-ship.optimize(3, from_orbit, to_orbit)
-#####
-
-
+'''
 x = [9,3,8,7,2,6,1,5,4,0]
 res1 = arp_instance.CompleteSolution(np.asarray(x))
 res2 = arp_instance.evaluate_sequence([-1] + x, current_time=0)
-plot_solution(arp_instance, x)
+plot_solution(arp_instance, x, projection = projection)
 #print(res1)
 print(res2)
 
-
-res = plot_solution(arp_instance, [8,3,0,6,7,9,2,4,1,5])
-plot_solution(arp_instance, [8,3,0,6,7,9,2,4,1,5])
+res = plot_solution(arp_instance, [8,3,0,6,7,9,2,4,1,5], projection = projection)
+#plot_solution(arp_instance, [8,3,0,6,7,9,2,4,1,5])
 res1 = arp_instance.CompleteSolution(np.asarray([8,3,0,6,7,9,2,4,1,5])) 
 res2 = arp_instance.evaluate_sequence([-1,8,3,0,6,7,9,2,4,1,5], current_time=0)
 print(res2)
 
+
 solution = arp_instance.optimize_transfer(0, 8, current_time = 0, t0_bounds = (0, 5110), t1_bounds = (1, 730), free_wait = True, multi = 3)
-print(solution)  
+print(solution.f)  
 
 solution = arp_instance.optimize_transfer(0, 8, current_time = 126.96358, t0_bounds = (0,4983.0366), t1_bounds = (1, 730), free_wait = True, multi = 3)
-print(solution)        
+print(solution.f)        
 
 solution = arp_instance.optimize_transfer(0, 3, current_time = 0, t0_bounds = (0, 13870), t1_bounds = (1, 730), free_wait = True, multi=3)
-print(solution)        
+print(solution.f)        
 
 solution = arp_instance.optimize_transfer(0, 3, current_time = 69.746826, t0_bounds = (0,2120.2532), t1_bounds = (1, 730), free_wait = True, multi=4)
-print(solution)        
+print(solution.f)        
+'''
+# NOTE THAT FREE_WAIT(wait doesnt matter, only measures transfer) STILL MINIMISES F BUT ONLY_COST MINIMISES COST(NO time AT ALL)
 
-# NOTE THAT FREE_WAIT STILL MINIMISES F BUT ONLY_COST MINIMISES COST
-#TODO ask about above
 # Build nearest neighbor solution
-sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0)
+sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, use_phasing = True)
 print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
-plot_solution(arp_instance, sequence[1::], sol)  
-sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, free_wait = True)
-print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
-plot_solution(arp_instance, sequence[1::], sol)  
-sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, only_cost = True)
-print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
-plot_solution(arp_instance, sequence[1::],  sol)
+plot_solution(arp_instance, sequence[1::], sol, projection = projection)  
 
-sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, metric='energy')
+sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, free_wait = True, use_phasing = True)
 print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
-plot_solution(arp_instance, sequence[1::],  sol)  
-sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, metric='energy', free_wait = True)
+plot_solution(arp_instance, sequence[1::], sol, projection = projection)  
+
+sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, only_cost = True, use_phasing = True)
 print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
-plot_solution(arp_instance, sequence[1::],  sol)  
-sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, metric='energy', only_cost = True)
-print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
-plot_solution(arp_instance, sequence[1::],  sol)  
+plot_solution(arp_instance, sequence[1::],  sol, projection = projection)
 
 
+sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, metric='orbital', use_phasing = False)
+print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
+plot_solution(arp_instance, sequence[1::],  sol, projection = projection)  
+sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, metric='orbital', free_wait = True, use_phasing = False)
+print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
+plot_solution(arp_instance, sequence[1::],  sol, projection = projection)  
+sol, sequence = arp_instance.build_nearest_neighbor(current_time = 0, metric='orbital', only_cost = True, use_phasing = False)
+print(f"*** sequence = {sequence}, t = {sol.ship.leg_times}, cost = {sol.get_cost()}\n\n")
+plot_solution(arp_instance, sequence[1::],  sol, projection = projection)  
+
+'''
 f, x = arp_instance.evaluate_sequence(sequence, current_time = 0)
 print(f"*** t = {x}, cost = {f}\n\n")
 
@@ -108,7 +99,7 @@ for t1 in range(5, 730, 1):
     if result < best:
         best = result
         best_t1 = t1
-        print(f"{t1}:{result}")
+        #print(f"{t1}:{result}")
     #print(f"{t1}:{result}")
 
 
@@ -143,3 +134,4 @@ print(f"t0={solution.ship.leg_times[0]}, t1={solution.ship.leg_times[1]}, f={sol
 
 solution = arp_instance.optimize_transfer(8, 1, 0, t0_bounds = (0,730), t1_bounds = (0.01,730))
 print(f"t0={solution.ship.leg_times[0]}, t1={solution.ship.leg_times[1]}, f={solution.f}")
+'''
