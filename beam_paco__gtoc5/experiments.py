@@ -87,6 +87,8 @@ def safe_dump(data, fname, append=False):
 	Should another process be concurrently accessing the file's data (such as
 	through `pickle_iterator`/`batch_iterator`), the function sleeps and
 	retries, until the writing succeeds.
+    
+    NOT CURRENTLY IMPLEMENTED
 	"""
 	mode = 'ab' if append else 'wb'
 	

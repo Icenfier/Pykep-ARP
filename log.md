@@ -139,7 +139,7 @@
 
 
 ## Week 7, 29/07
-### Mon, 7 hrs
+### Mon, 8 hrs
 - AM: fixed incorrect epoch that was causing a difference in final cost and cost used for f calculations
 - PM: wrote function to compare poliastro and pykep random_search results
 
@@ -153,5 +153,14 @@
 - AM: overwrote knn.py _init_ so that code actually runs
 - PM: implemented knn phasing into greedynn 
 
-### Fri, 6hrs
+### Fri, 5 hrs
 -     started looking into implementing beam search
+
+
+
+## Week 8, 05/08
+### Mon-Fri, 7 hrs per day
+-     implementing beam search 
+-     implementing p-aco
+-     writing documentaion within code
+

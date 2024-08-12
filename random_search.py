@@ -3,7 +3,9 @@ import pandas as pd
 
 def RandomSearch(instance, seed, budget):
     #np.random.seed(seed)
-    seeds = [1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 2, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 3, 30, 4, 5, 6, 7, 8, 9]
+    seeds = [1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, # 1-30 in alphanumeric 
+             2, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, # order to match 
+             3, 30, 4, 5, 6, 7, 8, 9]                   # pre-existing results
     n = instance.n
     sample = []
     fitnesses = []

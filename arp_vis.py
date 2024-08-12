@@ -53,7 +53,7 @@ def get_fig_size(width, fraction=1, subplots=(1, 1), ratio = (5**.5 - 1) / 2):
     return (fig_width_in, fig_height_in)
 
 
-def plot_solution(self, sequence, sol=False, ax = None, projection='3d'):
+def plot_solution(problem, sequence, sol=False, ax = None, projection='2d'):
     fig = plt.figure(figsize=((10,8)))
     if projection == '3d':
         ax = fig.add_subplot(projection='3d')
@@ -64,7 +64,7 @@ def plot_solution(self, sequence, sol=False, ax = None, projection='3d'):
     sequence = np.asarray(sequence)
     if not sol:
         print('Solution object not provided. Sequence will be evaluated before plotting.')
-        sol = self.CompleteSolution(sequence)
+        sol = problem.CompleteSolution(sequence)
     f = sol.f
     t = sol.ship.leg_times
     maneuvers = sol.ship.maneuvers
@@ -79,15 +79,10 @@ def plot_solution(self, sequence, sol=False, ax = None, projection='3d'):
     else:
         ax.scatter(0,0, color='y', s = 70, axes = ax, label = 'Sun')
     plot_planet(ship, t0 = epoch, N = 200, units = 1000, axes = ax, color = 'black', alpha = 0.5, legend=('Earth',False), projection = projection)
-    #legend = ['Sun','','Earth']
-    #print(t)
     for k, (ast, man) in enumerate(zip(sequence,maneuvers)):
-        #print(k)
-        #print(ast)
-        #print(man)
-        to_orbit = self.get_ast_orbit(ast)
+        to_orbit = problem.get_ast_orbit(ast)
         ship = propagate(ship, epoch)
-        plot_lambert(l = man, N = 200, units = 1000, sol = 0, color = f'C{k+1}',legend='False', axes = ax, projection = projection, linestyle = '--') #label = generate_label(epoch, f'Impulse {k}'))
+        plot_lambert(l = man, N = 200, units = 1000, sol = 0, color = f'C{k+1}',legend='False', axes = ax, projection = projection, linestyle = '--') 
         ax.lines[-1].set_label(f'Transfer {k+1}')
         epoch = def_epoch(epoch.mjd2000+man.get_tof()/DAY2SEC)
         ship = switch_orbit(to_orbit, epoch)
@@ -123,7 +118,7 @@ def plot_solution(self, sequence, sol=False, ax = None, projection='3d'):
         ax.set_ylim([-maxlim, maxlim])
         ax.set_aspect('equal')
     
-    plt.legend(bbox_to_anchor=(1,1))
+    plt.legend(ncol = (problem.n//15)+1, bbox_to_anchor=(1,1))
     fig.suptitle(f'$\Delta v$={cost:.1f} km/s, $T$={tot_time:.1f} days, $f$={f:.1f}', x=.58, y=0.94)
     plt.show()
 

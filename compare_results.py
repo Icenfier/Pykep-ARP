@@ -5,6 +5,11 @@ import numpy as np
 from greedy_nn import GreedyNN
 from random_search import RandomSearch
 
+"""
+Reads in pre-existing results from when this code relied on poliastro. 
+Performs the same calculations for comparison.
+"""
+
 #### GreedyNN ####
 '''
 blank = DataFrame(data=[[0,'#','#','#','#','#','#','#']], 
@@ -27,17 +32,13 @@ greedynn_combined = concat(to_merge)
 print(greedynn_combined)
 '''
 #### RandomSearch ####
-
-#blank = DataFrame(data=[['0','#','#','#','#','#','#','#']], 
-#                     columns=['Fitness','x','seed','budget','Function evaluations','instance','Solver'])
-#to_merge = [blank]
+'''
 rand_comparisons = {}
 for folder in os.listdir('D:/UniCompSci/ARP internship/GitHub/Pykep-ARP/results/randomsearch'):
     inst = folder.split('_')
     arp_instance = AsteroidRoutingProblem(int(inst[1]), int(inst[2]))
     seed = 1
     budget = 400 
-#    to_merge = [blank]
 
     for file in os.listdir(f'D:/UniCompSci/ARP internship/GitHub/Pykep-ARP/results/randomsearch/{folder}'):
         poli_data = read_csv(f'D:/UniCompSci/ARP internship/GitHub/Pykep-ARP/results/randomsearch/{folder}/{file}', 
@@ -50,6 +51,5 @@ for folder in os.listdir('D:/UniCompSci/ARP internship/GitHub/Pykep-ARP/results/
         idx = np.argsort(np.concatenate([np.arange(d.shape[0]) for d in dfs]))
         rand_comparisons["instance{0}".format(arp_instance.instance_name)] = concat(dfs, ignore_index=True).iloc[idx]
         
-       
 print(rand_comparisons)
-
+'''

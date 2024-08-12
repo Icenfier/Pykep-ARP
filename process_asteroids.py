@@ -20,8 +20,12 @@ def to_orbit(ast):
 
 # Read asteroids
 asteroids = pd_read_csv("Candidate_Asteroids.txt.xz", header=None, sep='\s+',
-                        # ID, epoch(MJD), a(semi-eje mayor, AU), e (eccentricity), i (inclination, deg), RAAN(right ascension of ascending node, deg), w(perigeo, deg), M (mean anomaly, deg) and mass(kg)
-                        names = ['ID','epoch', 'a', 'e', 'i', 'raan', 'w', 'M', 'mass'], index_col = 'ID')
+                        # ID, epoch(MJD), a(semi-eje mayor, AU), 
+                        # e (eccentricity), i (inclination, deg), 
+                        # RAAN(right ascension of ascending node, deg), 
+                        # w(perigeo, deg), M (mean anomaly, deg) and mass(kg)
+                        names = ['ID','epoch', 'a', 'e', 'i', 'raan', 'w', 'M', 
+                                 'mass'], index_col = 'ID')
 _ast_epoch = asteroids.epoch.unique()
 # All asteroids have the same EPOCH as Earth. The code later relies on this.
 assert len(_ast_epoch) == 1
@@ -29,5 +33,5 @@ assert EARTH_START_EPOCH.mjd2000 == _ast_epoch[0]
 asteroids.drop('epoch',  axis=1, inplace=True)
 deg_columns = ['i','raan','w','M'] 
 asteroids[deg_columns] = asteroids[deg_columns].transform(np.deg2rad)
-ast_orbits = asteroids.apply(to_orbit, axis=1) #TODO add naming? 
+ast_orbits = asteroids.apply(to_orbit, axis=1)
 ast_orbits.to_pickle("pykep_ast_orbits.pkl.gz")

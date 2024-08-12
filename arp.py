@@ -51,7 +51,8 @@ class VisitProblem:
         self.to_orbit = to_orbit
 
     def __call__(self, leg_time):
-        man, from_orbit, to_orbit = two_shot_transfer(self.from_orbit, self.to_orbit, t0=leg_time[0], t1=leg_time[1])
+        man, from_orbit, to_orbit = two_shot_transfer(self.from_orbit, self.to_orbit, 
+                                                      t0=leg_time[0], t1=leg_time[1])
         cost = calc_cost(man, from_orbit, to_orbit)
         time = leg_time.sum()
         f = self.update_best(leg_time, cost, time, man)
@@ -73,28 +74,25 @@ class VisitProblem:
             print(f'{f}:{cost}:{time}:{leg_time}')
         return f
 
-def inner_minimize_multistart(fun, full_fun, multi, bounds, x0 = False, method = 'SLSQP', constraints = (), **kwargs):
-    # fun is part of function to minimise, full_fun is full function to allow return of differnt values
+def inner_minimize_multistart(fun, full_fun, multi, bounds, x0 = False, 
+                              method = 'SLSQP', constraints = (), **kwargs):
+    # fun is part of function to minimise, full_fun is full function to allow return of different values
+    
     # splitting into smaler chunks to find minima
     options = get_default_opts(method, **kwargs)
     best_f = np.inf
     best_t0 = None
     best_t1 = None
     deltas = [ .0, .25, .5, .75, 1.0, .125, .375, .625, .875]
-    for d in deltas[:multi]: #TODO sort bounds out
+    for d in deltas[:multi]: 
         if not x0:
             x0 = (bounds[0][0] + d * (bounds[0][1] - bounds[0][0]), min(30, bounds[1][1]))
-        res = minimize(fun, x0 = x0, bounds = bounds, method = method, constraints = constraints, **options)
+        res = minimize(fun, x0 = x0, bounds = bounds, method = method, 
+                       constraints = constraints, **options)
         if res.fun < best_f:
             best_f, best_t0, best_t1 = res.fun, res.x[0], res.x[1] 
             _, best_man = full_fun(best_t0, best_t1)
     return (best_f, best_t0, best_t1), best_man
-
-
-#def inner_minimize(fun, x0, bounds, method = 'SLSQP', constraints = (), **kwargs):
-#    options = get_default_opts(method, **kwargs)
-#    res = minimize(fun, x0 = x0, bounds = bounds, method = method, constraints = constraints, **options)
-#    return (res.fun, res.x[0], res.x[1])
 
 
 def optimize_problem(problem, method = 'SLSQP', **kwargs):
@@ -112,42 +110,25 @@ class Spaceship:
         self.costs = []
         self.orbit = propagate(Earth, START_EPOCH)
         self.leg_times = np.array([])
-        self.f = 0.0
+        self.f = []
 
-    def add_ast(self, ast_id, leg_time, f, maneuver, cost):
+    def add_ast(self, ast_id, leg_time, f_val, maneuver, cost):
         self.ast_list.append(ast_id)
         self.orbit = self.get_ast_orbit(ast_id)
         self.leg_times = np.append(self.leg_times, leg_time)
-        self.f += f
-        #print(f"f = {self.f}")
+        self.f = np.append(self.f, f_val)
         self.maneuvers.append(maneuver)
         self.costs.append(cost)
-
-    def optimize(self, ast_id, from_orbit, to_orbit, **kwargs):
-        instance = VisitProblem(from_orbit, to_orbit)
-        optimize_problem(instance, **kwargs)
-        self.add_ast(ast_id, leg_time = instance.best_leg_time, f = instance.best_f, maneuver = instance.best_man, cost = calc_cost(instance.best_man, from_orbit, to_orbit))
         
-    #def launch(self, ast_id, **kwargs):
-    #    #TODO setting f to 0 in init, dont need launch anymore
-    #    self.f = 0.0
-    #    return self.visit(ast_id, **kwargs)
+    def return_all(self):
+        return self.ast_list, self.leg_times, self.f, self.maneuvers, self.costs
 
-    def visit(self, ast_id, **kwargs):
-        epoch = def_epoch(START_EPOCH.mjd2000 + self.leg_times.sum())
-        from_orbit = propagate(self.orbit, epoch)
-        to_orbit = self.get_ast_orbit(ast_id)
-        #TODO make sure to_orbit epoch correct
-        self.optimize(ast_id, from_orbit, to_orbit, **kwargs)
-        return self
-
-#from problem import Problem
 class AsteroidRoutingProblem():
     # Class attributes
     problem_name = "ARP"
 
     @classmethod
-    def read_instance(cls, instance_name): #allows n and seed to be set in instance name
+    def read_instance(cls, instance_name): 
         *_, n, seed = instance_name.split("_")
         return cls(int(n), int(seed))
     
@@ -173,10 +154,10 @@ class AsteroidRoutingProblem():
         return ((sequence >= 0) & (sequence < self.n)).all() and np.unique(sequence).shape[0] == sequence.shape[0]
     
     def fitness(self, x):
-      f = self.fitness_nosave(x)
-      self.solutions.append(x)
-      self.evaluations.append(f)
-      return f
+        f = self.fitness_nosave(x)
+        self.solutions.append(x)
+        self.evaluations.append(f)
+        return f
   
     def distance_to_best(self, perm, distance):
         if self.best_sol is None:
@@ -188,24 +169,37 @@ class AsteroidRoutingProblem():
             self.instance = instance
             self.ship = Spaceship(instance.asteroids)
             self._sequence = []
+            self.unvisited_ids = np.arange(instance.n)
 
-        def step(self, k):
-            assert k not in self._sequence 
+        def step(self, to_id):
+            assert to_id not in self._sequence 
             assert len(self._sequence) < self.instance.n
-            #if len(self._sequence) == 0:
-            #    self.ship.launch(k)
-            #else:
-            self.ship.visit(k)
-            self._sequence.append(k)
+            if len(self._sequence) == 0:
+                from_id = -1
+            else:
+                from_id = self._sequence[-1]
+            current_time = self.get_time()
+            self.instance.optimize_transfer(from_id, to_id, current_time, self)
+            
+            self._sequence.append(to_id)
             return self._sequence, self.ship.f
         
+        def log_visit(self, visited_ast):
+            assert visited_ast not in self._sequence 
+            assert len(self._sequence) < self.instance.n
+            prev = np.asarray(self.unvisited_ids)
+            new = np.setdiff1d(prev, visited_ast)
+            self.unvisited_ids = new
+            self._sequence.append(visited_ast)
+            return
+            
         @property
         def sequence(self):
             return np.asarray(self._sequence, dtype=int)
 
         @property
         def f(self):
-            return self.ship.f
+            return sum(self.ship.f)
 
         def get_cost(self):
             return sum(self.ship.costs)
@@ -216,23 +210,33 @@ class AsteroidRoutingProblem():
 
     def EmptySolution(self):
         return self._Solution(self)
-
+    
+    def PartialSolution(self, copy):
+        sol = self._Solution(self)
+        ast_ids, leg_times, fs, mans, costs = copy.ship.return_all()
+        for i, ast_id in enumerate(ast_ids):
+            sol.ship.add_ast(ast_id, (leg_times[2*i],leg_times[2*i+1]), 
+                             fs[i], mans[i], costs[i])
+            sol.log_visit(ast_id)
+        return sol
+        
     def CompleteSolution(self, sequence):
         self.check_permutation(sequence)
         sol = self._Solution(self)
-        for k in sequence:
-            sol.step(k)
+        for ast_id in sequence:
+            sol.step(ast_id)
         return sol
 
-
-
-    def evaluate_transfer(self, from_id, to_id, current_time, t0, t1, only_cost = False, free_wait = False):
-        """Here t0 is relative to current_time and t1 is relative to current_time + t0"""
+    def evaluate_transfer(self, from_id, to_id, current_time, t0, t1, 
+                          only_cost = False, free_wait = False):
+        """Here t0 is relative to current_time and 
+        t1 is relative to current_time + t0"""
         from_orbit = self.get_ast_orbit(from_id)
         to_orbit = self.get_ast_orbit(to_id)
         start_epoch = def_epoch(START_EPOCH.mjd2000 + current_time)
         from_orbit = propagate(from_orbit, start_epoch) # ensures correct ref. time for transfer
-        man, from_orbit, to_orbit = two_shot_transfer(from_orbit, to_orbit, t0 = t0, t1=t1) # _is orbit after transfer
+        man, from_orbit, to_orbit = two_shot_transfer(from_orbit, to_orbit, 
+                                                      t0 = t0, t1=t1) 
         cost = calc_cost(man, from_orbit, to_orbit)
         assert not (only_cost and free_wait)
         if only_cost:
@@ -240,20 +244,14 @@ class AsteroidRoutingProblem():
         if free_wait:
             t0 = 0
         f = VisitProblem.f(cost, t0+t1)
-        # if f < self.best_f:
-        #     self.best_f = f
-        #     print(f'New best:{f}:{cost}:{t0+t1}:[{t0}, {t1}]')
         return f, man
 
-    #def evaluate_transfer(self, from_id, to_id, current_time, t0, t1, only_cost = False, free_wait = False):
-    #    """Calculate objective function value of going from one asteroid to another departing at current_time + t0 and flying for a duration of t1. An asteroid ID of -1 denotes Earth."""
-    #    from_orbit = self.get_ast_orbit(from_id)
-    #    to_orbit = self.get_ast_orbit(to_id)
-    #    return self._evaluate_transfer_orbit(from_orbit, to_orbit, current_time, t0, t1, only_cost = only_cost, free_wait = free_wait)
-    
+       
     def optimize_transfer(self, from_id, to_id, current_time, sol = False,
-                          t0_bounds = VisitProblem.VISIT_BOUNDS, t1_bounds = VisitProblem.TRANSFER_BOUNDS, total_time_bounds = False, 
-                          multi = 1, only_cost = False, free_wait = False, return_times = False):
+                          t0_bounds = VisitProblem.VISIT_BOUNDS, 
+                          t1_bounds = VisitProblem.TRANSFER_BOUNDS, 
+                          total_time_bounds = False, multi = 1, 
+                          only_cost = False, free_wait = False, return_times = False):
         from_orbit = self.get_ast_orbit(from_id)
         from_orbit = propagate(from_orbit, def_epoch(START_EPOCH.mjd2000 + current_time))
         to_orbit = self.get_ast_orbit(to_id)
@@ -277,28 +275,30 @@ class AsteroidRoutingProblem():
             # x references array of [t0, t1]
             cons = ({'type': 'ineq', 'fun': lambda x: total_time_bounds[1] - (x[0] + x[1]) }, 
                     {'type': 'ineq', 'fun': lambda x: x[0] + x[1] - total_time_bounds[0]})
-        res, man = inner_minimize_multistart(lambda x: self.evaluate_transfer(from_id, to_id, current_time, x[0], x[1],
-                                                                                only_cost = only_cost, free_wait = free_wait)[0],
+        res, man = inner_minimize_multistart(
+            lambda x: self.evaluate_transfer(from_id, to_id, current_time, x[0], x[1],
+                                             only_cost = only_cost, free_wait = free_wait)[0],
                                              full_fun = lambda t0, t1: self.evaluate_transfer(from_id, to_id, current_time, t0, t1,
                                                                                           only_cost = only_cost, free_wait = free_wait), 
                                              multi = multi, bounds = (t0_bounds, t1_bounds), x0=x0, constraints = cons)
         from_orbit = propagate(from_orbit, def_epoch(START_EPOCH.mjd2000 + current_time + res[1])) # propagated to start of transfer
         cost = calc_cost(man, from_orbit, to_orbit)
         sol.ship.add_ast(to_id, (res[1], res[2]), res[0], man, cost)
-        ### add ship object, append maneuver IN multistart? remove man return
         if return_times:
             return sol, res[1], res[2]
         return sol
   
         
-    def get_nearest_neighbor_euclidean(self, from_id, unvisited_ids, current_time, metric='euclidean'):
+    def get_nearest_neighbor_euclidean(self, from_id, unvisited_ids, current_time, 
+                                       metric='euclidean'):
         epoch = def_epoch(START_EPOCH.mjd2000 + current_time)
         from_r = np.array([self.get_ast_orbit(from_id).eph(epoch)[0]])
         ast_r = np.array([ self.get_ast_orbit(ast_id).eph(epoch)[0] for ast_id in unvisited_ids ])
         ast_dist = distance.cdist(from_r, ast_r, metric)
         return unvisited_ids[np.argmin(ast_dist)]
     
-    def get_nearest_neighbor_energy(self, from_id, unvisited_ids, current_time, metric='orbital'):
+    def get_nearest_neighbor_energy(self, from_id, unvisited_ids, current_time, 
+                                    metric='orbital'):
         from_a = self.get_ast_orbit(from_id).orbital_elements[0]
         from_mass = self.get_ast_orbit(from_id).mu_self / G
         ast_a = np.array([self.get_ast_orbit(ast_id).orbital_elements[0] for ast_id in unvisited_ids])
@@ -308,7 +308,8 @@ class AsteroidRoutingProblem():
         energy_diff = np.array([np.linalg.norm(np.subtract(from_energy, ast_energy)) for ast_energy in ast_energies])
         return unvisited_ids[np.argmin(energy_diff)]
     
-    def nearest_phasing(self, from_id, unvisited_ids, current_time, metric='euclidean'):
+    def nearest_phasing(self, from_id, unvisited_ids, current_time, 
+                        metric='euclidean'):
         epoch = def_epoch(START_EPOCH.mjd2000 + current_time)
         from_orbit = self.get_ast_orbit(from_id)
         ast_orbits = np.array([ self.get_ast_orbit(ast_id) for ast_id in unvisited_ids ])
@@ -317,8 +318,13 @@ class AsteroidRoutingProblem():
                                                             query_type='knn', k=[1])
         return unvisited_ids[near_id]
 
-    def build_nearest_neighbor(self, current_time, metric = 'euclidean', use_phasing=False, free_wait = False, only_cost = False):
-        """method optional, defaults to euclidean"""
+    def build_nearest_neighbor(self, current_time, metric = 'euclidean', 
+                               use_phasing=False, free_wait = False, only_cost = False):
+        """
+        Metrics:
+            'euclidean' - nearest neighbour by physical distance
+            'orbital' - nearest by orbital energy
+        """
         if use_phasing:
             get_nearest_neighbor = self.nearest_phasing
         else:
@@ -327,21 +333,19 @@ class AsteroidRoutingProblem():
             elif metric == 'orbital':
                 get_nearest_neighbor = self.get_nearest_neighbor_energy
             else:
-                print('Invalid nearest neighbor method. Check documentation for list of methods')
+                print('Invalid nearest neighbor metric. Check documentation for list of methods')
                 return np.inf, [-1,-1], np.inf 
         
         from_id = -1 # From Earth
-        unvisited_ids = np.arange(self.n)
-        #f_total = 0.0
-        #leg_times = []
         sequence = [ from_id ]
-        #maneuvers = []
-        #costs = []
         sol = self.EmptySolution()
-        while len(unvisited_ids) > 0:
-            to_id = get_nearest_neighbor(from_id = from_id, unvisited_ids = unvisited_ids, current_time = current_time, metric=metric)
-            sol, t0, t1 = self.optimize_transfer(from_id, to_id, current_time, sol=sol, t0_bounds = VisitProblem.VISIT_BOUNDS, t1_bounds = VisitProblem.TRANSFER_BOUNDS, free_wait = free_wait, only_cost = only_cost, return_times=True)
-            unvisited_ids = np.setdiff1d(unvisited_ids, to_id)
+        while len(sol.unvisited_ids) > 0:
+            to_id = get_nearest_neighbor(from_id = from_id, unvisited_ids = sol.unvisited_ids,
+                                         current_time = current_time, metric=metric)
+            sol, t0, t1 = self.optimize_transfer(from_id, to_id, current_time, 
+                                                 sol=sol, free_wait = free_wait, 
+                                                 only_cost = only_cost, return_times=True)
+            sol.unvisited_ids = np.setdiff1d(sol.unvisited_ids, to_id)
             #print(f'Departs from {from_id} at time {current_time + t0} after waiting {t0} days and arrives at {to_id} at time {current_time + t0 + t1} after travelling {t1} days, total cost = {f_total}')
             from_id = to_id
             sequence += [ to_id ]
@@ -352,14 +356,15 @@ class AsteroidRoutingProblem():
         return sol, sequence
 
     def evaluate_sequence(self, sequence, current_time):
-        #seq_orbits = [ self.get_ast_orbit(i) for i in sequence ]
-        #f_total = 0.0
-        #leg_times = []
+        """
+        Calculates optimal transfers for a given sequence of asteroids
+        """
         sol = self.EmptySolution()
         for i in range(1, len(sequence)):
             from_id = sequence[i-1]
             to_id = sequence[i]
-            sol, t0, t1 = self.optimize_transfer(from_id, to_id, current_time, sol=sol, t0_bounds = VisitProblem.TRANSFER_BOUNDS, t1_bounds = VisitProblem.VISIT_BOUNDS, return_times = True)
+            sol, t0, t1 = self.optimize_transfer(from_id, to_id, current_time, 
+                                                 sol=sol, return_times = True)
         
             #print(f'Departs from {sequence[i-1]} at time {current_time + t0} after waiting {t0} days and arrives at {sequence[i]} at time {current_time + t0 + t1} after travelling {t1} days, total cost = {f_total}')        
             current_time += t0+t1
