@@ -15,6 +15,9 @@ import os
 from phasing import fixed_knn
            
 
+# ==================================== ## ==================================== #
+# ---------------------------- # Define heuristic estimates from orbital phasing
+
 def rate__orbital(dep_ast, arr_asteroids, dep_t, leg_dT, **kwargs):
     """
     Orbital Phasing Indicator.
@@ -68,27 +71,10 @@ def heuristic(rating, unvisited, n, gamma=50):#, tabu=()):
     full_heur = np.zeros(n)
     full_heur[unvisited] = heur
     return full_heur
-
-def add_asteroid(ph, mission, next_ast, use_cache=False, stats=None, **kwargs):
-    """
-    Extend `mission` by visiting a new asteroid.
-    """
-        
-    assert isinstance(next_ast, (int, np.integer)) and 0 <= next_ast <= 7075, \
-        "Next asteroid should be given as an integer."
-    next_ast = int(next_ast)
     
-    if stats is not None:
-        # increment total number of [rendezvous] legs defined
-        stats.nr_legs += 1
-    mission = rendezvous_leg(ph, mission, next_ast, stats=stats, **kwargs)
-    
-    return True, mission
-    
-
 
 # ==================================== ## ==================================== #
-# ------------------------------------ # Define rendezvous and self-flyby legs
+# ------------------------ # Define rendezvous leg and adding asteroids to route
 
 def rendezvous_leg(ph, mission, next_ast, leg_dT=None, leg_dT_bounds=None,
                    obj_fun=None, stats=None, **kwargs):
@@ -113,6 +99,23 @@ def rendezvous_leg(ph, mission, next_ast, leg_dT=None, leg_dT_bounds=None,
     mission.log_visit(next_ast)
     
     return mission
+
+
+def add_asteroid(ph, mission, next_ast, use_cache=False, stats=None, **kwargs):
+    """
+    Extend `mission` by visiting a new asteroid.
+    """
+        
+    assert isinstance(next_ast, (int, np.integer)) and 0 <= next_ast <= 7075, \
+        "Next asteroid should be given as an integer."
+    next_ast = int(next_ast)
+    
+    if stats is not None:
+        # increment total number of [rendezvous] legs defined
+        stats.nr_legs += 1
+    mission = rendezvous_leg(ph, mission, next_ast, stats=stats, **kwargs)
+    
+    return True, mission
 
 # ==================================== ## ==================================== #
 # ---------------------------------- # Define problem and experimental procedure
